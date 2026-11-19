@@ -6,9 +6,9 @@ const products = [
 ];
 
 const slides = [
-  { eyebrow: 'NUEVA TEMPORADA · CONCEPTO 2026', title: 'Hay pasos<br>que <em>lo cambian</em><br>todo.', description: 'Piezas que acompañan tu esencia. Estilo, carácter y ese detalle que hace que cada paso se sienta único.', image: 'assets/campana-hero.webp', alt: 'Botines color vino en una sesión editorial de moda', caption: 'Inconfundible.' },
-  { eyebrow: 'EL ESTILO ES UNA ACTITUD', title: 'Tu estilo<br>no pide <em>permiso.</em>', description: 'Redescubre la fuerza de un buen par de zapatos. Porque lo que llevas también cuenta tu historia.', image: 'assets/editorial-pasos.webp', alt: 'Zapatos de tacón color vino sobre escalones de piedra', caption: 'Auténtica.' },
-  { eyebrow: 'PARA CADA VERSIÓN DE TI', title: 'Haz de cada día<br>una <em>ocasión.</em>', description: 'Desde lo cotidiano hasta lo especial, encuentra inspiración en nuevas siluetas.', image: 'assets/zapato-tacones.webp', alt: 'Zapatos de tacón marfil sobre fondo rosa', caption: 'Esencial.' }
+  { eyebrow: 'NUEVA TEMPORADA · CONCEPTO 2026', title: 'No es solo<br>un par.<br><em>Es tu actitud.</em>', description: 'Hay zapatos que completan un look. Y otros que lo transforman. Descubre inspiración para tu siguiente gran paso.', image: 'assets/campana-hero.webp', alt: 'Botines color vino en una sesión editorial de moda', caption: 'Inconfundible.' },
+  { eyebrow: 'EL ESTILO ES UNA ACTITUD', title: 'Atrévete a<br><em>pisar fuerte.</em>', description: 'Haz espacio para nuevas versiones de ti. Una silueta puede cambiar por completo la forma de llevar tu día.', image: 'assets/editorial-pasos.webp', alt: 'Zapatos de tacón color vino sobre escalones de piedra', caption: 'Auténtica.' },
+  { eyebrow: 'PARA CADA VERSIÓN DE TI', title: 'Hay días que<br>merecen<br><em>destacar.</em>', description: 'De lo cotidiano a lo extraordinario: encuentra ese detalle que hace que todo el look se sienta diferente.', image: 'assets/zapato-tacones.webp', alt: 'Zapatos de tacón marfil sobre fondo rosa', caption: 'Esencial.' }
 ];
 
 const productGrid = document.getElementById('productGrid');
@@ -319,16 +319,45 @@ document.querySelectorAll('[data-slide]').forEach(dot => dot.addEventListener('c
   goToSlide(Number(dot.dataset.slide));
   restartSlider();
 }));
+document.getElementById('heroPrev').addEventListener('click', () => {
+  goToSlide((currentSlide + slides.length - 1) % slides.length);
+  restartSlider();
+});
+document.getElementById('heroNext').addEventListener('click', () => {
+  goToSlide((currentSlide + 1) % slides.length);
+  restartSlider();
+});
 const hero = document.querySelector('.hero');
 hero.addEventListener('mouseenter', () => { if (slideTimer) window.clearInterval(slideTimer); });
 hero.addEventListener('mouseleave', restartSlider);
+let heroTouchStartX = 0;
+hero.addEventListener('touchstart', event => { heroTouchStartX = event.changedTouches[0].clientX; }, { passive: true });
+hero.addEventListener('touchend', event => {
+  const delta = event.changedTouches[0].clientX - heroTouchStartX;
+  if (Math.abs(delta) < 70) return;
+  goToSlide((currentSlide + (delta < 0 ? 1 : slides.length - 1)) % slides.length);
+  restartSlider();
+}, { passive: true });
 
 let scrollFramePending = false;
+const navLinks = [...document.querySelectorAll('.desktop-nav a')];
 function updateScrollDetails() {
   const limit = document.documentElement.scrollHeight - window.innerHeight;
   const progress = limit > 0 ? Math.min(100,Math.max(0,window.scrollY / limit * 100)) : 0;
   document.getElementById('scrollIndicator').style.width = `${progress}%`;
   document.querySelector('.floating-whatsapp').classList.toggle('is-visible',window.scrollY > 440);
+  const position = window.scrollY + window.innerHeight * .4;
+  let currentSection = '';
+  navLinks.forEach(link => {
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target && target.offsetTop <= position) currentSection = target.id;
+  });
+  navLinks.forEach(link => {
+    const active = link.getAttribute('href') === `#${currentSection}`;
+    link.classList.toggle('is-current', active);
+    if (active) link.setAttribute('aria-current','location');
+    else link.removeAttribute('aria-current');
+  });
   scrollFramePending = false;
 }
 window.addEventListener('scroll', () => {
