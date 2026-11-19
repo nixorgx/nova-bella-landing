@@ -751,3 +751,5 @@ h1 em, h2 em, h3 em { font-weight: 400; color: #ad7485; }
 @media (max-width: 370px) {
   .hero-copy-wrap { height: 740px; min-height: 740px; flex-basis: 740px; }
 }
+/* Imagen del inventario conectado; mantiene la misma geometría de cada tarjeta. */
+.live-product-photo { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }

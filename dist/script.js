@@ -1,4 +1,4 @@
-const products = [
+let products = [
   { id: 'alba', name: 'Alba · Slingback', category: 'Tacones', color: 'Marfil', price: 'Bs 429', badge: 'ELEGANCIA DIARIA', imageClass: 'shot-ivory', description: 'Una silueta delicada y contemporánea, pensada para aportar elegancia a cada ocasión.' },
   { id: 'vega', name: 'Vega · Bota alta', category: 'Botas', color: 'Negro', price: 'Bs 549', badge: 'ESTILO ICÓNICO', imageClass: 'shot-black', description: 'Una bota de líneas definidas que transforma cualquier look con carácter.' },
   { id: 'roma', name: 'Roma · Botín', category: 'Botas', color: 'Vino', price: 'Bs 489', badge: 'NUEVO ESTILO', imageClass: 'shot-wine', description: 'Una textura de acabado intenso y una forma audaz para destacar sin esfuerzo.' },
@@ -49,6 +49,38 @@ try {
 
 const heartIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.3 5.4a5.3 5.3 0 0 0-7.5 0L12 6.2l-.8-.8a5.3 5.3 0 0 0-7.5 7.5L12 21l8.3-8.1a5.3 5.3 0 0 0 0-7.5Z"/></svg>';
 
+const escapeProductHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const visualForColor = color => {
+  const tone = String(color || '').toLocaleLowerCase('es');
+  if (/negro|black/.test(tone)) return 'shot-black';
+  if (/vino|rojo|granate/.test(tone)) return 'shot-wine';
+  if (/café|cafe|caramelo|marrón|camel/.test(tone)) return 'shot-tan';
+  return 'shot-ivory';
+};
+
+async function hydrateCatalog() {
+  const base = String(window.NOVA_BELLA_API_URL || '').trim().replace(/\/+$/, '');
+  if (!base || !/^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(base)) return;
+  try {
+    const response = await fetch(`${base}/api/v1/public/products`, { headers: { Accept: 'application/json' }, credentials: 'omit', signal: AbortSignal.timeout(7000) });
+    if (!response.ok) throw Error(`API HTTP ${response.status}`);
+    const data = await response.json();
+    if (!Array.isArray(data.items)) throw Error('Respuesta del catalogo incorrecta');
+    products = data.items.map(item => ({
+      id: String(item.id), name: String(item.name), category: String(item.category),
+      color: String(item.color), price: `Bs ${Number(item.price_bs).toLocaleString('es-BO')}`,
+      description: String(item.description || ''), badge: 'DISPONIBLE',
+      imageClass: visualForColor(item.color),
+      imageUrl: typeof item.image_url === 'string' && /^https:\/\//i.test(item.image_url) ? item.image_url : ''
+    }));
+    favorites = new Set([...favorites].filter(id => products.some(product => product.id === id)));
+    localStorage.setItem('nova-bella-favoritos', JSON.stringify([...favorites]));
+    renderProducts();
+  } catch (error) {
+    console.warn('Catalogo no disponible. Se mantienen las ilustraciones.', error.message);
+  }
+}
+
 function showToast(message) {
   window.clearTimeout(toastTimer);
   toast.textContent = message;
@@ -89,15 +121,15 @@ function renderProducts() {
   productGrid.innerHTML = filtered.map((product, index) => `
     <article class="product-card" style="animation-delay:${index * 65}ms">
       <div class="product-art">
-        <div class="product-photo product-shot ${product.imageClass}" role="img" aria-label="Imagen ilustrativa de ${product.name}"></div>
-        <span class="product-badge">${product.badge}</span>
-        <button type="button" class="product-heart ${favorites.has(product.id) ? 'is-favorite' : ''}" data-favorite="${product.id}" aria-label="${favorites.has(product.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}: ${product.name}" aria-pressed="${favorites.has(product.id)}">${heartIcon}</button>
-        <button type="button" class="product-quick" data-quick-view="${product.id}" aria-label="Ver detalles de ${product.name}">Vista rápida</button>
+        ${product.imageUrl ? `<img class="product-photo live-product-photo" src="${escapeProductHtml(product.imageUrl)}" alt="${escapeProductHtml(product.name)}" loading="lazy">` : `<div class="product-photo product-shot ${product.imageClass}" role="img" aria-label="Imagen ilustrativa de ${escapeProductHtml(product.name)}"></div>`}
+        <span class="product-badge">${escapeProductHtml(product.badge)}</span>
+        <button type="button" class="product-heart ${favorites.has(product.id) ? 'is-favorite' : ''}" data-favorite="${escapeProductHtml(product.id)}" aria-label="${favorites.has(product.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}: ${escapeProductHtml(product.name)}" aria-pressed="${favorites.has(product.id)}">${heartIcon}</button>
+        <button type="button" class="product-quick" data-quick-view="${escapeProductHtml(product.id)}" aria-label="Ver detalles de ${escapeProductHtml(product.name)}">Vista rápida</button>
       </div>
       <div class="product-data">
-        <span class="product-category">${product.category.toUpperCase()}</span>
-        <h3>${product.name}</h3>
-        <div class="product-meta"><span class="product-price">${product.price}</span><span class="product-color"><span class="card-swatch ${product.imageClass.replace('shot-','swatch-')}"></span>${product.color}</span></div>
+        <span class="product-category">${escapeProductHtml(product.category.toUpperCase())}</span>
+        <h3>${escapeProductHtml(product.name)}</h3>
+        <div class="product-meta"><span class="product-price">${escapeProductHtml(product.price)}</span><span class="product-color"><span class="card-swatch ${product.imageClass.replace('shot-','swatch-')}"></span>${escapeProductHtml(product.color)}</span></div>
       </div>
     </article>
   `).join('');
@@ -216,7 +248,7 @@ document.addEventListener('keydown', event => {
 function updateDialogLink() {
   if (!activeDialogProduct) return;
   const sizeText = selectedSize ? ` en talla ${selectedSize}` : '';
-  const message = `Hola Nova Bella. Vi su propuesta de página web y quisiera saber si tienen un modelo similar a ${activeDialogProduct.name}${sizeText}. ¿Podrían compartirme opciones disponibles y precios reales?`;
+  const message = `Hola Nova Bella. Vi el modelo ${activeDialogProduct.name}${sizeText} en su página. ¿Podrían confirmarme disponibilidad, tallas y precio?`;
   document.getElementById('dialogWhatsApp').href = `https://wa.me/59171439946?text=${encodeURIComponent(message)}`;
 }
 
@@ -228,6 +260,9 @@ function openProductDialog(id) {
   const image = document.getElementById('dialogProductImage');
   image.className = `dialog-product-image product-shot ${product.imageClass}`;
   image.setAttribute('aria-label', `Imagen ilustrativa de ${product.name}`);
+  image.style.backgroundImage = product.imageUrl ? `url("${product.imageUrl.replace(/["\\]/g, '')}")` : '';
+  image.style.backgroundSize = product.imageUrl ? 'cover' : '';
+  image.style.backgroundPosition = product.imageUrl ? 'center' : '';
   document.getElementById('dialogProductName').textContent = product.name;
   document.getElementById('dialogProductDescription').textContent = product.description;
   document.getElementById('dialogPrice').textContent = `${product.price} · Referencial`;
@@ -382,4 +417,5 @@ if ('IntersectionObserver' in window) {
 }
 
 renderProducts();
+hydrateCatalog();
 restartSlider();
