@@ -15,6 +15,20 @@
 
 **Contacto de la boutique:** Av. Heroínas, esquina Antezana, edificio Sky Box, piso 8, oficina 1B, Cochabamba. WhatsApp: **+591 71439946**. Verificar con la tienda estos datos antes de cualquier publicación comercial definitiva.
 
+### Organización del repositorio
+
+```text
+nova-bella-landing/
+├── dist/                 # Landing pública (ubicación actual, sin cambios)
+├── admin/
+│   ├── dist/             # Interfaz estática del centro de control
+│   └── README.md         # Instrucciones específicas del panel
+├── backend/              # FastAPI, PostgreSQL y Docker Compose
+└── README.md             # Este manual general
+```
+
+El código del centro de control está versionado en `admin/`, pero **su alojamiento y permisos siguen administrándose de forma independiente** en ChatGPT Sites. Subir cambios a GitHub **no actualiza automáticamente** ninguna de las dos páginas publicadas. La carpeta `dist/` de la landing conserva su ruta original para no romper comandos y despliegues existentes.
+
 > **Estado de las versiones (19/11/2026):** este manual reúne las interfaces publicadas y la revisión más reciente del backend que se ha trabajado localmente. La rama `main` de GitHub todavía no incluye todos los archivos de esa revisión (entre ellos `backend/scripts/configure_local_database.py`, `backend/requirements-dev.txt`, `backend/PRODUCCION.md` y `render.yaml`). Los pasos que mencionan esos archivos se aplican **después de sincronizar los cambios locales pendientes**. La documentación no equivale a haber desplegado esos cambios.
 
 ---
@@ -427,6 +441,15 @@ Abrir **http://127.0.0.1:5173/**. Para detener el servidor pulsar **Ctrl+C** en 
 
 > El comando se queda atendiendo solicitudes hasta que lo detienes: no escribas `cd` o `git clone` en esa misma sesión mientras está ejecutándose. Si aparece un `404`, comprueba que exista `dist\index.html` dentro de la carpeta desde la que lanzaste el comando.
 
+**Para abrir el centro de control desde una segunda terminal PowerShell:**
+
+```powershell
+cd C:\Users\avend\Desktop\nova-bella-landing
+python -m http.server 5174 --directory admin/dist
+```
+
+Visita **http://127.0.0.1:5174/**. Esta ejecución local muestra la interfaz; la protección de acceso del Site publicado no se aplica a un servidor estático en tu computadora. Consulta también `admin/README.md`.
+
 ### 9.3. API y PostgreSQL — puesta en marcha desde cero
 
 El proyecto utiliza **dos contenedores**: `api` y `postgres`. La versión revisada prepara un rol de base de datos con permisos limitados.
@@ -545,6 +568,8 @@ Para hacer el servicio público se necesitan **HTTPS**, secretos privados config
 | Archivo o carpeta | Propósito |
 | --- | --- |
 | `dist/` | Archivos estáticos publicados para la landing. |
+| `admin/dist/` | HTML, CSS, JavaScript y recursos estáticos del centro de control. |
+| `admin/README.md` | Guía de ejecución y límites del centro de control. |
 | `dist/api-config.js` | URL pública de la API que consulta la landing; no colocar secretos. |
 | `backend/app/` | Código de la API. |
 | `backend/compose.yaml` | Servicios Docker de API y PostgreSQL. |
@@ -555,7 +580,7 @@ Para hacer el servicio público se necesitan **HTTPS**, secretos privados config
 | `backend/PRODUCCION.md` | Guía de preparación HTTPS, **pendiente de subir a `main`**. |
 | `render.yaml` | Propuesta de configuración de despliegue, **pendiente de subir a `main`**. |
 
-El **centro de control publicado** tiene sus propios archivos de interfaz y puede mantenerse como un proyecto/sitio separado; no asumir que todas sus páginas están dentro de `dist/` de la landing. Consultar la organización concreta del repositorio antes de mover archivos.
+El **centro de control publicado** sigue siendo un Site independiente. Sus fuentes ahora están incluidas en `admin/dist/` del mismo repositorio, sin alterar la carpeta `dist/` de la landing ni los dos despliegues existentes.
 
 ## 11. Problemas habituales y soluciones
 
