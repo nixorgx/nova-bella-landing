@@ -221,12 +221,54 @@ h1 em, h2 em, h3 em { font-weight: 400; color: #ad7485; }
 .visit-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 25px; }
 .visit-map-link { font-size: 12px; font-weight: 700; color: var(--wine); border-bottom: 1px solid #b48a98; padding-bottom: 5px; }
 .visit-map-link span { font-size: 16px; margin-left: 6px; }
-.visit-card { background: #f4e9e6; background-image: radial-gradient(circle at 50% 45%,#f8f0ec 0,#e8d5d2 100%); min-height: 410px; display: flex; flex-direction: column; justify-content: space-between; padding: 31px 37px 29px; border: 1px solid #eee0db; }
-.visit-card-top,.visit-card-bottom { display: flex; align-items: center; justify-content: space-between; gap: 14px; color: #9b7580; font-size: 9px; font-weight: 700; letter-spacing: .16em; }
-.visit-card-center { text-align: center; margin: 20px 0; }
-.location-icon { font-size: 42px; color: #ad7b8a; display: block; line-height: 1; margin-bottom: 12px; }
-.visit-card-center h3 { font-size: 42px; letter-spacing: -.05em; line-height: 1.18; color: var(--wine); margin-bottom: 17px; }
-.visit-card-center p { font-size: 13px; line-height: 1.85; margin: 0; color: #816f74; }
+.visit-mail { position: relative; isolation: isolate; width: 100%; max-width: 610px; height: 540px; margin: 0 auto; background: radial-gradient(ellipse at 50% 52%,rgba(236,209,212,.33),transparent 60%); }
+.mail-eyebrow { position: absolute; inset: 8px 0 auto; text-align: center; color: #a37783; font-size: 10px; font-weight: 700; letter-spacing: .26em; }
+.mail-ornament { position: absolute; font-family: 'Playfair Display',Georgia,serif; color: #d4adb3; pointer-events: none; }
+.mail-ornament-left { top: 130px; left: 5%; font-size: 31px; opacity: .6; }
+.mail-ornament-right { top: 84px; right: 7%; font-size: 45px; opacity: .46; }
+.visit-envelope { position: absolute; z-index: 2; bottom: 69px; left: 50%; width: min(92%,460px); height: 245px; padding: 0; border: 0; background: transparent; transform: translateX(-50%); perspective: 900px; filter: drop-shadow(0 20px 24px rgba(79,39,50,.14)); transition: filter .6s var(--ease); }
+.visit-envelope:hover { filter: drop-shadow(0 24px 27px rgba(79,39,50,.19)); }
+.envelope-back,.envelope-flap,.envelope-pocket,.envelope-ribbon-horizontal,.envelope-ribbon-vertical,.envelope-bow,.envelope-caption { position: absolute; display: block; pointer-events: none; }
+.envelope-back { inset: 0; z-index: 1; background: linear-gradient(145deg,#f7e8e3 0%,#e3c5c8 100%); border: 1px solid #d9b4bb; box-shadow: inset 0 0 0 1px rgba(255,255,255,.4); }
+.envelope-back::before { content: 'NOVA ✦ BELLA'; position: absolute; top: 30px; left: 0; right: 0; text-align: center; color: #bd8e9b; font-family: 'Playfair Display',Georgia,serif; font-size: 20px; letter-spacing: .05em; opacity: .54; }
+.envelope-flap { inset: 0 0 auto; z-index: 4; height: 65%; background: linear-gradient(160deg,#f5e2df,#dbb6c0); clip-path: polygon(0 0,100% 0,50% 100%); transform-origin: 50% 0%; backface-visibility: hidden; transition: transform .85s cubic-bezier(.2,.7,.22,1); }
+.envelope-pocket { inset: 0; z-index: 5; background: linear-gradient(145deg,#f2dad9 0%,#e5c4c9 49%,#d8aeb9 100%); clip-path: polygon(0 0,50% 62%,100% 0,100% 100%,0 100%); box-shadow: inset 0 -1px 0 rgba(255,255,255,.4); }
+.envelope-pocket::after { content: ''; position: absolute; inset: 0; background: linear-gradient(155deg,rgba(255,255,255,.5),transparent 40%); }
+.envelope-ribbon-horizontal,.envelope-ribbon-vertical { z-index: 6; background: linear-gradient(100deg,#8a5068 0%,#c68da1 28%,#9a5c76 58%,#753a54 100%); box-shadow: inset 1px 0 2px rgba(255,255,255,.27),0 1px 3px rgba(59,23,38,.14); transition: opacity .26s ease,transform .45s var(--ease); }
+.envelope-ribbon-horizontal { left: 0; right: 0; top: 43%; height: 21px; }
+.envelope-ribbon-vertical { top: 0; bottom: 0; left: calc(50% - 10px); width: 20px; }
+.envelope-bow { z-index: 7; left: 50%; top: 46%; width: 126px; height: 95px; transform: translate(-50%,-50%); filter: drop-shadow(0 7px 6px rgba(71,28,47,.24)); transition: opacity .3s ease,transform .55s var(--ease); }
+.envelope-bow span { display: block; position: absolute; }
+.bow-loop { top: 10px; width: 58px; height: 46px; border: 1px solid rgba(245,191,211,.58); background: linear-gradient(135deg,#b1768e 2%,#7d3e5c 46%,#bb829b 80%,#88506a); box-shadow: inset 5px 4px 9px rgba(255,226,236,.28),inset -5px -5px 10px rgba(56,18,39,.17); }
+.bow-loop-left { left: 9px; border-radius: 56% 22% 42% 27%; transform: rotate(-29deg); }
+.bow-loop-right { right: 9px; border-radius: 22% 56% 27% 42%; transform: rotate(29deg); }
+.bow-tail { top: 41px; width: 22px; height: 57px; background: linear-gradient(90deg,#8d4b66,#c58ca4 50%,#85425e); clip-path: polygon(0 0,100% 0,100% 100%,50% 82%,0 100%); }
+.bow-tail-left { left: 43px; transform: rotate(19deg); }
+.bow-tail-right { right: 43px; transform: rotate(-19deg); }
+.bow-knot { left: 52px; top: 24px; width: 22px; height: 27px; border-radius: 9px; transform: rotate(8deg); background: linear-gradient(110deg,#ce9aac,#8b4a66 70%); box-shadow: inset 2px 2px 3px rgba(255,235,244,.38),0 2px 5px rgba(53,22,35,.16); }
+.envelope-caption { z-index: 8; bottom: 17px; left: 15px; right: 15px; text-align: center; color: #663847; font-size: 10px; letter-spacing: .23em; font-weight: 700; text-shadow: 0 1px rgba(255,255,255,.4); }
+.mail-instruction { position: absolute; bottom: 14px; left: 0; right: 0; margin: 0; text-align: center; color: #a17b85; font-size: 12px; letter-spacing: .035em; }
+.mail-instruction span { color: #b17e90; margin-left: 7px; }
+.visit-letter { position: absolute; z-index: 3; left: 50%; top: 95px; width: min(82%,416px); min-height: 366px; padding: 9px; color: var(--wine); background: #fffaf3; border: 1px solid #ebd9cf; box-shadow: 0 16px 48px rgba(65,33,45,.2),inset 0 0 0 1px #fff; opacity: 0; visibility: hidden; transform: translate(-50%,120px) scale(.9) rotate(1.5deg); transform-origin: 50% 100%; transition: opacity .28s ease,transform .75s var(--ease),visibility 0s linear .75s; pointer-events: none; }
+.visit-letter-inner { min-height: 346px; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 17px 22px 14px; border: 1px solid #e7d2cc; background: radial-gradient(circle at 50% 0%,rgba(240,218,215,.43),transparent 63%); }
+.visit-letter-top { width: 100%; display: flex; justify-content: space-between; gap: 12px; font-size: 9px; letter-spacing: .18em; font-weight: 700; color: #ab858f; }
+.visit-letter-flower { font-size: 30px; line-height: 1; margin: 14px 0 7px; color: #b98a98; }
+.visit-letter h3 { font-size: clamp(32px,3.5vw,40px); line-height: 1.08; letter-spacing: -.055em; margin: 0 0 12px; }
+.visit-letter address { font-style: normal; font-size: 13px; line-height: 1.65; color: #816f74; }
+.visit-letter-rule { width: 100%; display: flex; align-items: center; gap: 12px; margin: 15px 0 13px; color: #c097a2; font-size: 11px; }
+.visit-letter-rule::before,.visit-letter-rule::after { content: ''; display: block; height: 1px; flex: 1; background: #e7d3d0; }
+.visit-letter-contact { display: flex; flex-direction: column; gap: 4px; }
+.visit-letter-contact span { font-size: 9px; font-weight: 700; letter-spacing: .2em; color: #b08d97; }
+.visit-letter-contact strong { font-size: 16px; font-weight: 600; letter-spacing: .02em; }
+.visit-letter small { margin-top: 12px; font-size: 11px; color: #a78a90; }
+.visit-letter small em { font-family: 'Playfair Display',Georgia,serif; font-size: 15px; color: #865469; }
+.visit-mail.is-open .visit-letter { z-index: 9; visibility: visible; opacity: 1; transform: translate(-50%,-99px) scale(1) rotate(-1deg); transition-delay: .26s,.12s,0s; pointer-events: auto; }
+.visit-mail.is-open .envelope-flap { transform: rotateX(-180deg); transition-delay: .1s; }
+.visit-mail.is-open .envelope-ribbon-horizontal { opacity: 0; transform: scaleX(1.08); }
+.visit-mail.is-open .envelope-ribbon-vertical { opacity: 0; transform: scaleY(1.1); }
+.visit-mail.is-open .envelope-bow { opacity: 0; transform: translate(-50%,-92%) rotate(-9deg) scale(1.12); }
+.visit-mail:not(.is-open) .envelope-flap { transition-delay: .24s; }
+.visit-mail.is-open .envelope-caption { color: #6f4152; }
 
 .site-footer { background: #35202c; padding: 75px 0 30px; color: #fff8f6; }
 .footer-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 22px; padding-bottom: 68px; }
@@ -330,7 +372,7 @@ h1 em, h2 em, h3 em { font-weight: 400; color: #ad7485; }
   .faq-layout { grid-template-columns: 1fr; gap: 35px; }
   .faq-intro { max-width: 580px; }
   .visit-grid { grid-template-columns: 1fr; gap: 40px; }
-  .visit-card { max-width: 650px; width: 100%; }
+  .visit-mail { max-width: 650px; }
   .footer-wordmark { font-size: 10vw; }
 }
 
@@ -416,8 +458,14 @@ h1 em, h2 em, h3 em { font-weight: 400; color: #ad7485; }
   .faq-intro h2 { font-size: 48px; }
   .faq-item summary { font-size: 14px; padding: 20px 0; }
   .faq-item p { padding-right: 30px; font-size: 13px; }
-  .visit-card { min-height: 360px; padding: 24px; }
-  .visit-card-center h3 { font-size: 39px; }
+  .visit-mail { height: 510px; }
+  .visit-envelope { width: min(94%,420px); height: 220px; bottom: 75px; }
+  .visit-letter { width: min(86%,360px); top: 91px; min-height: 365px; }
+  .visit-letter-inner { min-height: 345px; padding: 16px 15px 12px; }
+  .visit-letter h3 { font-size: 36px; }
+  .visit-mail.is-open .visit-letter { transform: translate(-50%,-83px) scale(1) rotate(-1deg); }
+  .mail-ornament-left { top: 130px; }
+  .mail-instruction { font-size: 11px; }
   .site-footer { padding: 62px 0 30px; }
   .footer-top { flex-direction: column; align-items: flex-start; gap: 24px; padding-bottom: 47px; }
   .footer-wordmark { font-size: clamp(47px,11.7vw,83px); margin-top: 9px; }
@@ -444,6 +492,9 @@ h1 em, h2 em, h3 em { font-weight: 400; color: #ad7485; }
   .hero-buttons { gap: 15px; }
   .hero-buttons .button { width: 100%; }
   .collection-overlay h3 { font-size: 24px; }
+  .visit-letter { width: 90%; }
+  .visit-letter h3 { font-size: 33px; }
+  .visit-letter-top { letter-spacing: .1em; }
 }
 
 @media (prefers-reduced-motion: reduce) {
