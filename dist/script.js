@@ -266,6 +266,25 @@ document.querySelectorAll('.faq-item').forEach(item => item.addEventListener('to
   document.querySelectorAll('.faq-item').forEach(other => { if (other !== item) other.open = false; });
 }));
 
+const visitMail = document.getElementById('visitMail');
+const visitEnvelopeToggle = document.getElementById('visitEnvelopeToggle');
+const visitLetter = document.getElementById('visitLetter');
+
+function setVisitEnvelopeOpen(open) {
+  visitMail.classList.toggle('is-open', open);
+  visitEnvelopeToggle.setAttribute('aria-expanded', String(open));
+  visitEnvelopeToggle.setAttribute('aria-label', open ? 'Cerrar sobre de Nova Bella' : 'Abrir sobre con la información de Nova Bella');
+  visitLetter.setAttribute('aria-hidden', String(!open));
+  visitLetter.inert = !open;
+  document.getElementById('envelopeCaption').textContent = open ? 'TOCA PARA CERRAR' : 'TOCA PARA ABRIR';
+  document.getElementById('mailInstruction').innerHTML = open ? 'Un detalle hecho con cariño <span aria-hidden="true">✦</span>' : 'Un pequeño secreto te espera dentro <span aria-hidden="true">✦</span>';
+}
+
+visitEnvelopeToggle.addEventListener('click', () => setVisitEnvelopeOpen(!visitMail.classList.contains('is-open')));
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && visitMail.classList.contains('is-open')) setVisitEnvelopeOpen(false);
+});
+
 function goToSlide(index) {
   currentSlide = index;
   const slide = slides[index];
