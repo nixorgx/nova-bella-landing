@@ -13,6 +13,7 @@ const slides = [
 
 const productGrid = document.getElementById('productGrid');
 const productCounter = document.getElementById('productCounter');
+const productSort = document.getElementById('productSort');
 const filterButtons = [...document.querySelectorAll('[data-filter]')];
 const favoriteCount = document.getElementById('favoriteCount');
 const favoriteToggle = document.getElementById('favoriteToggle');
@@ -23,6 +24,10 @@ const searchInput = document.getElementById('searchInput');
 const menuToggle = document.getElementById('menuToggle');
 const mobileMenu = document.getElementById('mobileMenu');
 const dialog = document.getElementById('productDialog');
+const guideDialog = document.getElementById('sizeGuideDialog');
+const toast = document.getElementById('toast');
+const spotlightPhoto = document.getElementById('spotlightPhoto');
+const spotlightOptions = [...document.querySelectorAll('[data-spotlight]')];
 
 let currentCategory = 'Todos';
 let showOnlyFavorites = false;
@@ -31,7 +36,9 @@ let currentSlide = 0;
 let slideTimer;
 let activeDialogProduct = null;
 let selectedSize = null;
+let currentSpotlight = 'alba';
 let favorites = new Set();
+let toastTimer;
 
 try {
   const stored = JSON.parse(localStorage.getItem('nova-bella-favoritos') || '[]');
@@ -42,6 +49,13 @@ try {
 
 const heartIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.3 5.4a5.3 5.3 0 0 0-7.5 0L12 6.2l-.8-.8a5.3 5.3 0 0 0-7.5 7.5L12 21l8.3-8.1a5.3 5.3 0 0 0 0-7.5Z"/></svg>';
 
+function showToast(message) {
+  window.clearTimeout(toastTimer);
+  toast.textContent = message;
+  toast.classList.add('is-visible');
+  toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 2800);
+}
+
 function updateFavoriteCount() {
   favoriteCount.textContent = String(favorites.size);
   favoriteCount.hidden = favorites.size === 0;
@@ -51,12 +65,17 @@ function updateFavoriteCount() {
 
 function visibleProducts() {
   const term = currentSearch.trim().toLocaleLowerCase('es');
-  return products.filter(product => {
+  const filtered = products.filter(product => {
     const categoryMatch = currentCategory === 'Todos' || product.category === currentCategory;
     const favoriteMatch = !showOnlyFavorites || favorites.has(product.id);
     const searchMatch = !term || [product.name, product.category, product.color].join(' ').toLocaleLowerCase('es').includes(term);
     return categoryMatch && favoriteMatch && searchMatch;
   });
+  const numericPrice = product => Number(product.price.replace(/[^0-9]/g,''));
+  if (productSort.value === 'price-asc') filtered.sort((a,b) => numericPrice(a) - numericPrice(b));
+  if (productSort.value === 'price-desc') filtered.sort((a,b) => numericPrice(b) - numericPrice(a));
+  if (productSort.value === 'name') filtered.sort((a,b) => a.name.localeCompare(b.name,'es'));
+  return filtered;
 }
 
 function renderProducts() {
@@ -78,7 +97,7 @@ function renderProducts() {
       <div class="product-data">
         <span class="product-category">${product.category.toUpperCase()}</span>
         <h3>${product.name}</h3>
-        <div class="product-meta"><span class="product-price">${product.price}</span><span class="product-color">${product.color}</span></div>
+        <div class="product-meta"><span class="product-price">${product.price}</span><span class="product-color"><span class="card-swatch ${product.imageClass.replace('shot-','swatch-')}"></span>${product.color}</span></div>
       </div>
     </article>
   `).join('');
@@ -97,6 +116,7 @@ function setCategory(category) {
 }
 
 filterButtons.forEach(button => button.addEventListener('click', () => setCategory(button.dataset.filter)));
+productSort.addEventListener('change', () => { renderProducts(); showToast('Orden de productos actualizado'); });
 document.querySelectorAll('[data-category-link]').forEach(link => link.addEventListener('click', () => {
   currentSearch = '';
   searchInput.value = '';
@@ -107,10 +127,12 @@ productGrid.addEventListener('click', event => {
   const favoriteButton = event.target.closest('[data-favorite]');
   if (favoriteButton) {
     const id = favoriteButton.dataset.favorite;
-    if (favorites.has(id)) favorites.delete(id);
+    const wasFavorite = favorites.has(id);
+    if (wasFavorite) favorites.delete(id);
     else favorites.add(id);
     try { localStorage.setItem('nova-bella-favoritos', JSON.stringify([...favorites])); } catch (_) { /* Navegadores sin almacenamiento. */ }
     renderProducts();
+    showToast(wasFavorite ? 'Modelo eliminado de favoritos' : 'Guardado en tus favoritos');
     return;
   }
   const detailButton = event.target.closest('[data-quick-view]');
@@ -128,6 +150,27 @@ favoriteToggle.addEventListener('click', () => {
   renderProducts();
   document.getElementById('destacados').scrollIntoView({ behavior: 'smooth' });
 });
+
+function selectSpotlight(id) {
+  const product = products.find(item => item.id === id);
+  if (!product || id === currentSpotlight) return;
+  currentSpotlight = id;
+  spotlightPhoto.classList.add('is-changing');
+  spotlightOptions.forEach(button => {
+    const active = button.dataset.spotlight === id;
+    button.classList.toggle('is-active',active);
+    button.setAttribute('aria-pressed',String(active));
+  });
+  window.setTimeout(() => {
+    spotlightPhoto.className = `spotlight-photo product-shot ${product.imageClass}`;
+    spotlightPhoto.setAttribute('aria-label',`Fotografía del modelo ${product.name}`);
+    document.getElementById('spotlightName').textContent = product.name.replace(' · ',' ');
+    document.getElementById('spotlightCategory').textContent = `${product.category.toUpperCase()} · ${product.color.toUpperCase()}`;
+  },230);
+}
+
+spotlightOptions.forEach(button => button.addEventListener('click', () => selectSpotlight(button.dataset.spotlight)));
+document.getElementById('spotlightOpen').addEventListener('click', () => openProductDialog(currentSpotlight));
 
 function setSearchOpen(open) {
   searchPanel.hidden = !open;
@@ -209,6 +252,20 @@ document.getElementById('dialogSizes').addEventListener('click', event => {
   updateDialogLink();
 });
 
+function openSizeGuide() {
+  if (dialog.open) dialog.close();
+  guideDialog.showModal();
+}
+document.getElementById('openSizeGuide').addEventListener('click',openSizeGuide);
+document.getElementById('dialogSizeGuide').addEventListener('click',openSizeGuide);
+document.getElementById('sizeGuideClose').addEventListener('click',() => guideDialog.close());
+guideDialog.addEventListener('click',event => { if(event.target === guideDialog) guideDialog.close(); });
+
+document.querySelectorAll('.faq-item').forEach(item => item.addEventListener('toggle', () => {
+  if (!item.open) return;
+  document.querySelectorAll('.faq-item').forEach(other => { if (other !== item) other.open = false; });
+}));
+
 function goToSlide(index) {
   currentSlide = index;
   const slide = slides[index];
@@ -246,6 +303,21 @@ document.querySelectorAll('[data-slide]').forEach(dot => dot.addEventListener('c
 const hero = document.querySelector('.hero');
 hero.addEventListener('mouseenter', () => { if (slideTimer) window.clearInterval(slideTimer); });
 hero.addEventListener('mouseleave', restartSlider);
+
+let scrollFramePending = false;
+function updateScrollDetails() {
+  const limit = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = limit > 0 ? Math.min(100,Math.max(0,window.scrollY / limit * 100)) : 0;
+  document.getElementById('scrollIndicator').style.width = `${progress}%`;
+  document.querySelector('.floating-whatsapp').classList.toggle('is-visible',window.scrollY > 440);
+  scrollFramePending = false;
+}
+window.addEventListener('scroll', () => {
+  if (scrollFramePending) return;
+  scrollFramePending = true;
+  window.requestAnimationFrame(updateScrollDetails);
+}, { passive: true });
+updateScrollDetails();
 
 document.getElementById('year').textContent = String(new Date().getFullYear());
 
