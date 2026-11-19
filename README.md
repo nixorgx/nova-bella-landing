@@ -3,6 +3,8 @@
 > **Boutique de calzado · Cochabamba, Bolivia**  
 > Manual para conocer la tienda, navegar por el centro de control, interpretar sus indicadores y mantener la aplicación.
 
+**Repositorio central del proyecto:** [nixorgx/nova-bella-landing](https://github.com/nixorgx/nova-bella-landing) · Rama principal: `main`.
+
 **Esta guía está escrita para dos públicos:** el equipo de Nova Bella, que necesita utilizar la aplicación sin conocimientos de programación, y la persona encargada de instalarla o continuar su desarrollo. No es necesario leer la sección técnica para entender las pantallas.
 
 **Enlaces de la propuesta**
@@ -14,6 +16,16 @@
 | Instagram oficial de referencia | [@novabella.bolivia](https://www.instagram.com/novabella.bolivia/) | Clientes y responsables de contenido |
 
 **Contacto de la boutique:** Av. Heroínas, esquina Antezana, edificio Sky Box, piso 8, oficina 1B, Cochabamba. WhatsApp: **+591 71439946**. Verificar con la tienda estos datos antes de cualquier publicación comercial definitiva.
+
+### Estado de las aplicaciones
+
+| Componente | Código en este repositorio | Dónde se ejecuta o se publica | Acceso |
+| --- | --- | --- | --- |
+| **Landing / tienda** | [`dist/`](dist/) | [Sitio público de Nova Bella](https://nova-bella-boutique-2026.keenorbit34.chatgpt.site/) | Público |
+| **Centro de control** | [`admin/dist/`](admin/dist/) | [Panel administrativo](https://nova-bella-centro-control-2026.keenorbit34.chatgpt.site/) | Restringido por el alojamiento |
+| **API + base de datos** | [`backend/`](backend/) | Docker local; despliegue HTTPS remoto aún por verificar | Rutas administrativas con autenticación |
+
+**Un solo repositorio no significa un solo servidor:** GitHub guarda el código, ChatGPT Sites aloja ambas interfaces por separado y Docker ejecuta los servicios locales. El acceso restringido al panel publicado no impide que su código HTML/JS sea visible en este repositorio público; la protección de datos debe aplicarse en la API.
 
 ### Organización del repositorio
 
@@ -48,6 +60,7 @@ El código del centro de control está versionado en `admin/`, pero **su alojami
 11. [Problemas habituales y soluciones](#11-problemas-habituales-y-soluciones)
 12. [Qué falta para el lanzamiento comercial](#12-qué-falta-para-el-lanzamiento-comercial)
 13. [Guion breve para presentar la propuesta](#13-guion-breve-para-presentar-la-propuesta)
+14. [Cómo mantener y publicar cada parte](#14-cómo-mantener-y-publicar-cada-parte)
 
 ---
 
@@ -450,6 +463,8 @@ python -m http.server 5174 --directory admin/dist
 
 Visita **http://127.0.0.1:5174/**. Esta ejecución local muestra la interfaz; la protección de acceso del Site publicado no se aplica a un servidor estático en tu computadora. Consulta también `admin/README.md`.
 
+Las dos terminales deben permanecer abiertas para ver **landing y panel simultáneamente**. Si alguno de los puertos está ocupado, detén el proceso anterior con `Ctrl+C` o elige otro puerto libre.
+
 ### 9.3. API y PostgreSQL — puesta en marcha desde cero
 
 El proyecto utiliza **dos contenedores**: `api` y `postgres`. La versión revisada prepara un rol de base de datos con permisos limitados.
@@ -493,6 +508,7 @@ Se espera una respuesta con **`status: ok`**. En `docker compose ps -a`, los con
 | Servicio local | Dirección | Para qué sirve |
 | --- | --- | --- |
 | Landing | `http://127.0.0.1:5173` | Presentación pública en tu PC. |
+| Centro de control | `http://127.0.0.1:5174` | Administración visual en tu PC, sin el acceso restringido del hosting. |
 | API | `http://127.0.0.1:8001` | Lógica y endpoints. |
 | Salud de la API | `http://127.0.0.1:8001/api/v1/health` | Verificar respuesta. |
 | Documentación de API | `http://127.0.0.1:8001/docs` | Explorar operaciones disponibles. |
@@ -587,6 +603,7 @@ El **centro de control publicado** sigue siendo un Site independiente. Sus fuent
 | Síntoma | Causa frecuente | Qué hacer |
 | --- | --- | --- |
 | `404 File not found` al abrir `:5173` | El comando se inició desde una carpeta sin `dist/index.html`. | Entrar primero a la raíz del proyecto y repetir el servidor estático. |
+| `404 File not found` al abrir `:5174` | Falta `admin/dist/index.html` o el comando se ejecutó desde otra carpeta. | Actualizar la copia local desde GitHub y ejecutar el servidor desde la raíz. |
 | `no configuration file provided` en Compose | Se ejecutó desde fuera de `backend`. | `cd C:\Users\avend\Desktop\nova-bella-landing\backend`. |
 | `cd backend` dice que no existe | Ya estabas dentro de `backend`. | Consultar la ruta actual con `Get-Location`. |
 | La API muestra `Restarting (3)` | Falló al arrancar o validar configuración. | Revisar `docker compose logs --tail=80 api`. |
@@ -597,6 +614,7 @@ El **centro de control publicado** sigue siendo un Site independiente. Sus fuent
 | Error de importación `httpx2` en pruebas | Dependencia de cliente de pruebas faltante. | Instalar `requirements-dev.txt` o la dependencia indicada por la excepción. |
 | Panel conectado, landing sin cambios | La landing no usa la misma API HTTPS o el producto no está publicado. | Verificar `dist/api-config.js`, estado del producto y API pública. |
 | Datos distintos en dos computadoras | El módulo guarda información en cada navegador. | No asumir sincronización; hace falta conectarlo al backend. |
+| El código cambió en GitHub, pero no en la web | GitHub y ChatGPT Sites tienen procesos de publicación independientes. | Desplegar la revisión correspondiente en el Site correcto y conservar sus permisos. |
 | API funciona en PC, pero no en un sitio alojado | `127.0.0.1` apunta a cada equipo, no al servidor del usuario. | Publicar la API en HTTPS y configurar URLs autorizadas. |
 | Cambios desaparecieron tras restablecer | Se borró el estado local. | Consultar respaldos disponibles; no hay importación automática en la UI actual. |
 
@@ -628,6 +646,46 @@ Puedes mostrar el proyecto en este orden, en aproximadamente cinco minutos:
 Una forma clara de cerrar la explicación:
 
 > **«Nova Bella combina una experiencia atractiva para descubrir calzado con un espacio de administración pensado para entender el negocio: qué se vende, qué clientes regresan y dónde conviene concentrar los esfuerzos. La interfaz ya demuestra esos procesos y la siguiente etapa es conectar la operación diaria con información verificada y centralizada».**
+
+## 14. Cómo mantener y publicar cada parte
+
+El equipo puede trabajar en un único GitHub sin mezclar las publicaciones de las aplicaciones:
+
+| Si necesitas cambiar… | Edita… | Comprueba… | Publicación |
+| --- | --- | --- | --- |
+| Fotografías, secciones y navegación de la tienda | `dist/` | Landing local en `:5173` | Site público de Nova Bella |
+| Menú, estadísticas y pantallas administrativas | `admin/dist/` | Panel local en `:5174` | Site restringido del centro de control |
+| Reglas comerciales, autenticación y persistencia | `backend/` | Pruebas, Docker y `/api/v1/health` | API HTTPS cuando esté preparada |
+| Manual e instrucciones | `README.md`, `admin/README.md`, `backend/README.md` | Enlaces, comandos y coherencia de la información | Commit en GitHub; no requiere publicar una página |
+
+### Actualizar una copia local en Windows
+
+Desde PowerShell:
+
+```powershell
+cd C:\Users\avend\Desktop\nova-bella-landing
+git status
+git fetch origin
+```
+
+**Revisa el resultado de `git status` antes de integrar cambios.** Como el proyecto ha tenido trabajo local pendiente de subir, **no reemplaces ni descartes archivos modificados**. Si tu árbol está limpio y la rama local no tiene commits divergentes, puedes actualizarla con:
+
+```powershell
+git pull --ff-only origin main
+```
+
+Si Git avisa de cambios locales, conflictos o divergencia, conserva esas modificaciones y revisa primero las diferencias. No uses `git reset --hard` para intentar forzar la actualización.
+
+### Control de versiones y despliegue
+
+1. Probar el cambio en la interfaz o servicio correspondiente.
+2. Revisar `git diff` y `git status` para comprobar exactamente qué archivos se van a publicar.
+3. Confirmar que `.env`, claves, tokens, respaldos de bases de datos o datos personales **no** estén incluidos.
+4. Registrar el cambio en Git y subirlo a `main` mediante el flujo aprobado para el repositorio.
+5. **Solo si cambió un Site:** publicar también esa revisión en su proyecto de ChatGPT Sites. Verificar la URL y los permisos después de desplegar.
+6. **Si cambió el backend:** desplegar y verificar la API por separado; no asumir que una modificación en GitHub reinicia Docker ni actualiza el servidor remoto.
+
+El código de la landing y el centro de control ya está reunido en GitHub. La **sincronización completa de los cambios avanzados del backend local** sigue siendo una tarea distinta y debe revisarse antes de integrarla.
 
 ---
 
