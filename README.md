@@ -1,11 +1,11 @@
-# Nova Bella — Guía de uso y administración
+# Nova Bella — Manual general de la tienda y el centro de control
 
 > **Boutique de calzado · Cochabamba, Bolivia**  
 > Manual para conocer la tienda, navegar por el centro de control, interpretar sus indicadores y mantener la aplicación.
 
 **Repositorio central del proyecto:** [nixorgx/nova-bella-landing](https://github.com/nixorgx/nova-bella-landing) · Rama principal: `main`.
 
-**Esta guía está escrita para dos públicos:** el equipo de Nova Bella, que necesita utilizar la aplicación sin conocimientos de programación, y la persona encargada de instalarla o continuar su desarrollo. No es necesario leer la sección técnica para entender las pantallas.
+**Esta guía está dirigida a cualquier persona que quiera conocer Nova Bella:** visitantes de la tienda, personal autorizado para administrar el negocio y responsables técnicos. Cada sección explica lo necesario sin asumir conocimientos previos; la instalación para desarrolladores está al final.
 
 **Enlaces de la propuesta**
 
@@ -14,6 +14,25 @@
 | Tienda pública | [Landing Nova Bella](https://nova-bella-boutique-2026.keenorbit34.chatgpt.site/) | Clientes y visitantes |
 | Administración | [Centro de control Nova Bella](https://nova-bella-centro-control-2026.keenorbit34.chatgpt.site/) | Propietarios y personal autorizado |
 | Instagram oficial de referencia | [@novabella.bolivia](https://www.instagram.com/novabella.bolivia/) | Clientes y responsables de contenido |
+
+### Empezar en menos de un minuto
+
+**Si se visita la tienda por primera vez:**
+
+1. Abrir la [página de Nova Bella](https://nova-bella-boutique-2026.keenorbit34.chatgpt.site/).
+2. Recorrer las colecciones o buscar un modelo en el catálogo.
+3. Abrir sus detalles, consultar tallas y guardar favoritos si se desea.
+4. Usar **WhatsApp** para preguntar por disponibilidad, precio y cómo comprar.
+
+**Si se forma parte del equipo administrativo:**
+
+1. Solicitar acceso autorizado al [centro de control](https://nova-bella-centro-control-2026.keenorbit34.chatgpt.site/).
+2. Abrir **Resumen** para conocer los indicadores principales.
+3. Usar **Catálogo**, **Ventas**, **Clientes frecuentes** o **Consultas** según la tarea del día.
+4. Abrir **Análisis del negocio** para comparar períodos, metas y categorías.
+5. Consultar las secciones [4](#4-qué-significa-cada-pantalla) y [5](#5-diccionario-de-cifras-y-gráficas) para entender cada cifra.
+
+**Si se desea instalar o modificar el proyecto:** continuar en [Instalación local](#9-instalación-local-para-desarrolladores) y [Mantenimiento](#14-cómo-mantener-y-publicar-cada-parte). **No se necesita Docker ni Git para visitar la tienda publicada.**
 
 **Contacto de la boutique:** Av. Heroínas, esquina Antezana, edificio Sky Box, piso 8, oficina 1B, Cochabamba. WhatsApp: **+591 71439946**. Verificar con la tienda estos datos antes de cualquier publicación comercial definitiva.
 
@@ -41,8 +60,6 @@ nova-bella-landing/
 
 El código del centro de control está versionado en `admin/`, pero **su alojamiento y permisos siguen administrándose de forma independiente** en ChatGPT Sites. Subir cambios a GitHub **no actualiza automáticamente** ninguna de las dos páginas publicadas. La carpeta `dist/` de la landing conserva su ruta original para no romper comandos y despliegues existentes.
 
-> **Estado de las versiones (19/11/2026):** este manual reúne las interfaces publicadas y la revisión más reciente del backend que se ha trabajado localmente. La rama `main` de GitHub todavía no incluye todos los archivos de esa revisión (entre ellos `backend/scripts/configure_local_database.py`, `backend/requirements-dev.txt`, `backend/PRODUCCION.md` y `render.yaml`). Los pasos que mencionan esos archivos se aplican **después de sincronizar los cambios locales pendientes**. La documentación no equivale a haber desplegado esos cambios.
-
 ---
 
 ## Índice
@@ -55,11 +72,11 @@ El código del centro de control está versionado en `admin/`, pero **su alojami
 6. [Ejemplos de tareas cotidianas](#6-ejemplos-de-tareas-cotidianas)
 7. [De dónde salen los datos y qué se guarda](#7-de-dónde-salen-los-datos-y-qué-se-guarda)
 8. [Preguntas frecuentes](#8-preguntas-frecuentes)
-9. [Instalación local con Windows y Docker](#9-instalación-local-con-windows-y-docker)
+9. [Instalación local para desarrolladores](#9-instalación-local-para-desarrolladores)
 10. [Arquitectura, API y seguridad](#10-arquitectura-api-y-seguridad)
 11. [Problemas habituales y soluciones](#11-problemas-habituales-y-soluciones)
 12. [Qué falta para el lanzamiento comercial](#12-qué-falta-para-el-lanzamiento-comercial)
-13. [Guion breve para presentar la propuesta](#13-guion-breve-para-presentar-la-propuesta)
+13. [Recorrido guiado de la aplicación](#13-recorrido-guiado-de-la-aplicación)
 14. [Cómo mantener y publicar cada parte](#14-cómo-mantener-y-publicar-cada-parte)
 
 ---
@@ -402,6 +419,9 @@ La API puede guardar **productos, perfiles por alias y ventas** en PostgreSQL y 
 **¿Necesito una cuenta para mirar los zapatos?**  
 No. La landing es de acceso público.
 
+**¿Cualquier visitante puede abrir el centro de control?**  
+No. La administración está destinada a personal autorizado y su sitio publicado tiene acceso restringido. El enlace público de la tienda no concede permisos administrativos.
+
 **¿El cliente compra directamente desde la web?**  
 No. Por ahora explora modelos e inicia una consulta por WhatsApp.
 
@@ -429,86 +449,96 @@ Sí, para visitar las dos páginas publicadas según sus permisos de acceso. Doc
 **¿Qué significa Bs?**  
 Bolivianos, moneda usada en los precios y reportes.
 
-## 9. Instalación local con Windows y Docker
+## 9. Instalación local para desarrolladores
 
-> Esta sección es para la persona que mantiene el proyecto. Las instrucciones asumen una copia del repositorio en `C:\Users\avend\Desktop\nova-bella-landing`, PowerShell, Python y Docker Desktop. Ajustar la ruta si se clonó en otra carpeta.
+> **Esta sección es opcional.** Para navegar por las páginas publicadas basta con un navegador y, en el caso del centro de control, contar con los permisos correspondientes. Los siguientes pasos son para quienes quieran ejecutar el código en su propio equipo, en Windows, Linux o macOS.
 
 ### 9.1. Requisitos
 
 - **Navegador actualizado** para las interfaces.
 - **Python 3** para un servidor web estático y scripts de configuración.
-- **Docker Desktop** iniciado, con `docker compose` disponible.
+- **Docker** instalado e iniciado, con `docker compose` disponible (Docker Desktop en Windows y macOS).
 - **Git** para actualizar la copia del repositorio (opcional para ejecutar lo ya descargado).
-- Dependencias Python especificadas en `backend/requirements.txt` y `backend/requirements-dev.txt` para scripts y pruebas.
+- Dependencias Python del backend, indicadas en `backend/requirements.txt`. Algunas revisiones también incluyen `backend/requirements-dev.txt`.
 
-### 9.2. Abrir la landing en el ordenador
+### 9.2. Descargar el proyecto y abrir las interfaces
 
-En PowerShell:
+En una terminal, ubicarse primero en la carpeta donde se desee guardar el proyecto y ejecutar:
 
-```powershell
-cd C:\Users\avend\Desktop\nova-bella-landing
+```bash
+git clone https://github.com/nixorgx/nova-bella-landing.git
+cd nova-bella-landing
+```
+
+Quien ya tenga el repositorio descargado **no debe clonarlo de nuevo**: basta con entrar en su carpeta. Todos los comandos siguientes parten de la **raíz del proyecto** (la carpeta que contiene `README.md`, `dist/`, `admin/` y `backend/`).
+
+**Abrir la landing:**
+
+```bash
 python -m http.server 5173 --directory dist
 ```
 
-Abrir **http://127.0.0.1:5173/**. Para detener el servidor pulsar **Ctrl+C** en esa terminal.
+Abrir **http://127.0.0.1:5173/**. Para detener el servidor, pulsar **Ctrl+C** en la terminal. En sistemas donde el comando `python` no exista, utilizar `python3`.
 
-> El comando se queda atendiendo solicitudes hasta que lo detienes: no escribas `cd` o `git clone` en esa misma sesión mientras está ejecutándose. Si aparece un `404`, comprueba que exista `dist\index.html` dentro de la carpeta desde la que lanzaste el comando.
+> El comando permanece en ejecución hasta detenerlo. Si aparece un `404`, comprobar que el proyecto contenga `dist/index.html` y que la terminal esté ubicada en su raíz.
 
-**Para abrir el centro de control desde una segunda terminal PowerShell:**
+**Abrir el centro de control desde otra terminal, en la raíz del mismo proyecto:**
 
-```powershell
-cd C:\Users\avend\Desktop\nova-bella-landing
+```bash
 python -m http.server 5174 --directory admin/dist
 ```
 
-Visita **http://127.0.0.1:5174/**. Esta ejecución local muestra la interfaz; la protección de acceso del Site publicado no se aplica a un servidor estático en tu computadora. Consulta también `admin/README.md`.
+Abrir **http://127.0.0.1:5174/**. Esta ejecución local muestra la interfaz, pero **no aplica las restricciones de acceso del alojamiento publicado**. Consultar también [`admin/README.md`](admin/README.md).
 
 Las dos terminales deben permanecer abiertas para ver **landing y panel simultáneamente**. Si alguno de los puertos está ocupado, detén el proceso anterior con `Ctrl+C` o elige otro puerto libre.
 
-### 9.3. API y PostgreSQL — puesta en marcha desde cero
+### 9.3. API y PostgreSQL — configuración opcional
 
-El proyecto utiliza **dos contenedores**: `api` y `postgres`. La versión revisada prepara un rol de base de datos con permisos limitados.
+El backend utiliza **dos contenedores**: `api` y `postgres`. No son necesarios para ver las pantallas estáticas. Sí hacen falta para ejecutar la API y probar su integración con una base de datos.
 
-**Si descargaste solo la rama `main` actual de GitHub:** sigue el procedimiento de `backend/README.md` correspondiente a esa revisión. Allí, `python -m scripts.generate_secrets` **muestra** el secreto y el hash para copiarlos manualmente a `.env`, y `docker compose up -d --build` inicia los servicios. No uses el procedimiento avanzado de abajo hasta que sus archivos se hayan incorporado al repositorio.
+La fuente principal para instalar la versión exacta descargada es [`backend/README.md`](backend/README.md). En la rama `main` publicada, el proceso general es:
 
-**Si tienes la versión local avanzada con `scripts/configure_local_database.py`:** utiliza este procedimiento de seguridad y rol limitado:
+```bash
+cd backend
+```
 
-```powershell
-cd C:\Users\avend\Desktop\nova-bella-landing\backend
-Copy-Item .env.example .env
+Crear un archivo privado llamado `.env` a partir de `.env.example`:
+
+- **Windows (PowerShell):** `Copy-Item .env.example .env`
+- **Linux o macOS:** `cp .env.example .env`
+
+Después, instalar las dependencias y generar las credenciales administrativas:
+
+```bash
 python -m pip install -r requirements.txt
 python -m scripts.generate_secrets
 ```
 
-En la versión local avanzada, el último comando solicitará el **correo administrativo** y una **contraseña** mediante entrada oculta; guarda en `.env` el hash y el secreto JWT. **Nunca subas `.env` a GitHub, lo envíes por chat ni tomes capturas que revelen secretos.**
+La versión publicada del generador solicita una contraseña y muestra `JWT_SECRET` y `ADMIN_PASSWORD_HASH` para introducirlos **únicamente en el archivo privado `.env`**; también se deben configurar `ADMIN_EMAIL` y un `POSTGRES_PASSWORD` aleatorio. Nunca publicar este archivo, secretos ni contraseñas. En sistemas que utilizan `python3`, reemplazar `python` por `python3` en los comandos de Python.
 
-Antes del primer arranque, `APP_DATABASE_PASSWORD` debe estar presente para que Compose pueda procesar su configuración. Si el `.env.example` de tu revisión no incluye esa clave, añade una entrada **temporal**, que el script siguiente reemplazará:
+Después, desde `backend/`:
 
-```powershell
-if (-not (Select-String -Path .env -Pattern '^APP_DATABASE_PASSWORD=' -Quiet)) {
-    Add-Content -Path .env -Value 'APP_DATABASE_PASSWORD=INICIALIZACION_TEMPORAL'
-}
-docker compose up -d postgres
-python -m scripts.configure_local_database
-docker compose up -d --build api
+```bash
+docker compose up -d --build
 ```
 
-El script `configure_local_database` crea el esquema y una cuenta de aplicación limitada para **esta base Docker local**. No está diseñado para ejecutarse contra una base compartida o remota. Si tu copia del repositorio difiere de la versión descrita aquí, revisar primero `backend/README.md` y `backend/PRODUCCION.md`.
+**Otras revisiones del proyecto** incorporan `scripts/configure_local_database.py` para preparar una cuenta PostgreSQL con permisos limitados y un archivo `requirements-dev.txt`. Esas mejoras todavía no están incluidas en la rama principal publicada a la fecha de este manual. Cuando estén disponibles, seguir las instrucciones que acompañen esa revisión; no ejecutar comandos para archivos inexistentes.
+
+> **Estado técnico (19/11/2026):** este manual reúne las interfaces publicadas y el alcance de una revisión más reciente del backend desarrollada localmente. La rama `main` todavía no incluye todos sus archivos (`scripts/configure_local_database.py`, `requirements-dev.txt`, `PRODUCCION.md` y `render.yaml`). No confundir esa documentación con un despliegue remoto verificado.
 
 ### 9.4. Comprobar que funciona
 
-```powershell
+```bash
 docker compose ps -a
-Invoke-RestMethod http://127.0.0.1:8001/api/v1/health
 docker compose logs --tail=80 api
 ```
 
-Se espera una respuesta con **`status: ok`**. En `docker compose ps -a`, los contenedores deberían aparecer como **Up (healthy)** después del arranque.
+Para comprobar la API, abrir **http://127.0.0.1:8001/api/v1/health** en un navegador o usar `curl http://127.0.0.1:8001/api/v1/health`. Se espera una respuesta con **`status: ok`**. En `docker compose ps -a`, los contenedores deberían aparecer como **Up (healthy)** después del arranque.
 
 | Servicio local | Dirección | Para qué sirve |
 | --- | --- | --- |
-| Landing | `http://127.0.0.1:5173` | Presentación pública en tu PC. |
-| Centro de control | `http://127.0.0.1:5174` | Administración visual en tu PC, sin el acceso restringido del hosting. |
+| Landing | `http://127.0.0.1:5173` | Presentación de la tienda en el equipo local. |
+| Centro de control | `http://127.0.0.1:5174` | Administración visual local, sin el acceso restringido del alojamiento. |
 | API | `http://127.0.0.1:8001` | Lógica y endpoints. |
 | Salud de la API | `http://127.0.0.1:8001/api/v1/health` | Verificar respuesta. |
 | Documentación de API | `http://127.0.0.1:8001/docs` | Explorar operaciones disponibles. |
@@ -516,7 +546,7 @@ Se espera una respuesta con **`status: ok`**. En `docker compose ps -a`, los con
 
 Para detener los contenedores sin eliminar el volumen de datos:
 
-```powershell
+```bash
 docker compose down
 ```
 
@@ -524,10 +554,15 @@ docker compose down
 
 ### 9.5. Ejecutar pruebas
 
-Desde la carpeta `backend` **cuando hayas sincronizado `requirements-dev.txt`**:
+Desde la carpeta `backend`, con las dependencias de prueba instaladas. **Solo si existe** `requirements-dev.txt` en la revisión descargada, instalarlo primero:
 
-```powershell
+```bash
 python -m pip install -r requirements-dev.txt
+```
+
+Después ejecutar las pruebas disponibles:
+
+```bash
 python -m unittest discover -s tests -v
 ```
 
@@ -604,12 +639,12 @@ El **centro de control publicado** sigue siendo un Site independiente. Sus fuent
 | --- | --- | --- |
 | `404 File not found` al abrir `:5173` | El comando se inició desde una carpeta sin `dist/index.html`. | Entrar primero a la raíz del proyecto y repetir el servidor estático. |
 | `404 File not found` al abrir `:5174` | Falta `admin/dist/index.html` o el comando se ejecutó desde otra carpeta. | Actualizar la copia local desde GitHub y ejecutar el servidor desde la raíz. |
-| `no configuration file provided` en Compose | Se ejecutó desde fuera de `backend`. | `cd C:\Users\avend\Desktop\nova-bella-landing\backend`. |
-| `cd backend` dice que no existe | Ya estabas dentro de `backend`. | Consultar la ruta actual con `Get-Location`. |
+| `no configuration file provided` en Compose | Se ejecutó desde fuera de `backend`. | Entrar en la carpeta `backend/` del repositorio y repetir el comando. |
+| `cd backend` dice que no existe | La terminal ya está dentro de `backend` o en otra carpeta. | Comprobar la ruta con `pwd` (Linux/macOS) o `Get-Location` (PowerShell). |
 | La API muestra `Restarting (3)` | Falló al arrancar o validar configuración. | Revisar `docker compose logs --tail=80 api`. |
 | Error de `JWT_SECRET` | Falta una clave aleatoria suficientemente larga. | Ejecutar `python -m scripts.generate_secrets` desde `backend` y recrear la API. |
 | Error de `ADMIN_PASSWORD_HASH` | Falta el hash scrypt válido. | Generar credenciales con el script; no pegar contraseña en texto plano. |
-| Error de `APP_DATABASE_PASSWORD` | No se creó la cuenta restringida/configuración local. | Completar el procedimiento de la sección 9.3. |
+| Error de `APP_DATABASE_PASSWORD` | Se intenta usar una revisión avanzada sin completar su configuración. | Consultar las instrucciones específicas de esa revisión antes de iniciar Compose. |
 | Health no responde | La API no está levantada, reinicia o el puerto difiere. | Verificar `docker compose ps -a`, logs y puerto `8001`. |
 | Error de importación `httpx2` en pruebas | Dependencia de cliente de pruebas faltante. | Instalar `requirements-dev.txt` o la dependencia indicada por la excepción. |
 | Panel conectado, landing sin cambios | La landing no usa la misma API HTTPS o el producto no está publicado. | Verificar `dist/api-config.js`, estado del producto y API pública. |
@@ -632,9 +667,9 @@ La propuesta ya permite recorrer la experiencia de marca y utilizar un panel de 
 
 **Propuesta de prioridad:** primero conectar y verificar catálogo y ventas reales; después seguimiento de clientes y consultas; finalmente cuentas de cliente, fidelización e integraciones más complejas.
 
-## 13. Guion breve para presentar la propuesta
+## 13. Recorrido guiado de la aplicación
 
-Puedes mostrar el proyecto en este orden, en aproximadamente cinco minutos:
+Para conocer las funciones principales, cualquier persona puede seguir este recorrido de aproximadamente cinco minutos. Los pasos administrativos requieren acceso autorizado:
 
 1. **Marca (45 s):** abrir la landing, mostrar carrusel, colecciones, lookbook y la carta de contacto.
 2. **Interés del cliente (45 s):** buscar un modelo, abrir detalles, marcar favorito y mostrar cómo inicia la consulta por WhatsApp.
@@ -643,7 +678,7 @@ Puedes mostrar el proyecto en este orden, en aproximadamente cinco minutos:
 5. **Trabajo diario (45 s):** enseñar el registro de ventas, un perfil con seguimiento y el catálogo administrativo.
 6. **Camino al lanzamiento (30 s):** explicar la conexión inicial con FastAPI/PostgreSQL y qué módulos se integrarán después.
 
-Una forma clara de cerrar la explicación:
+La idea central del recorrido es:
 
 > **«Nova Bella combina una experiencia atractiva para descubrir calzado con un espacio de administración pensado para entender el negocio: qué se vende, qué clientes regresan y dónde conviene concentrar los esfuerzos. La interfaz ya demuestra esos procesos y la siguiente etapa es conectar la operación diaria con información verificada y centralizada».**
 
@@ -658,19 +693,18 @@ El equipo puede trabajar en un único GitHub sin mezclar las publicaciones de la
 | Reglas comerciales, autenticación y persistencia | `backend/` | Pruebas, Docker y `/api/v1/health` | API HTTPS cuando esté preparada |
 | Manual e instrucciones | `README.md`, `admin/README.md`, `backend/README.md` | Enlaces, comandos y coherencia de la información | Commit en GitHub; no requiere publicar una página |
 
-### Actualizar una copia local en Windows
+### Actualizar cualquier copia local del repositorio
 
-Desde PowerShell:
+Desde la carpeta del proyecto, en una terminal de Windows, Linux o macOS:
 
-```powershell
-cd C:\Users\avend\Desktop\nova-bella-landing
+```bash
 git status
 git fetch origin
 ```
 
-**Revisa el resultado de `git status` antes de integrar cambios.** Como el proyecto ha tenido trabajo local pendiente de subir, **no reemplaces ni descartes archivos modificados**. Si tu árbol está limpio y la rama local no tiene commits divergentes, puedes actualizarla con:
+**Revisar el resultado de `git status` antes de integrar cambios.** Si hay modificaciones locales, **no reemplazarlas ni descartarlas**. Si el árbol está limpio y la rama local no tiene commits divergentes, se puede actualizar con:
 
-```powershell
+```bash
 git pull --ff-only origin main
 ```
 
