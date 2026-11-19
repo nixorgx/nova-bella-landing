@@ -12,9 +12,12 @@ La experiencia combina un lenguaje visual editorial de boutique con interacción
 
 - Portada con carrusel de tres campañas visuales.
 - Sección de colecciones con enlaces y filtros.
+- Lookbook interactivo que permite alternar entre cuatro modelos de calzado.
 - Catálogo ilustrativo de cuatro modelos y precios en bolivianos.
-- Búsqueda de modelos, filtros por tipo y lista de favoritos guardada en el navegador.
+- Búsqueda de modelos, filtros por tipo, ordenamiento por precio o nombre y lista de favoritos guardada en el navegador.
 - Vista rápida de cada modelo, selección de talla y consulta por WhatsApp.
+- Guía orientativa de medidas para elegir tallas; la equivalencia real debe confirmarse con la tienda.
+- Preguntas frecuentes, avisos de interacción y acceso flotante a WhatsApp.
 - Información de contacto, dirección de referencia verificada y enlace a mapas.
 - Diseño adaptable a móvil, tableta y computadora, con controles accesibles.
 
