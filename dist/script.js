@@ -276,8 +276,7 @@ function setVisitEnvelopeOpen(open) {
   visitEnvelopeToggle.setAttribute('aria-label', open ? 'Cerrar sobre de Nova Bella' : 'Abrir sobre con la información de Nova Bella');
   visitLetter.setAttribute('aria-hidden', String(!open));
   visitLetter.inert = !open;
-  document.getElementById('envelopeCaption').textContent = open ? 'TOCA PARA CERRAR' : 'TOCA PARA ABRIR';
-  document.getElementById('mailInstruction').innerHTML = open ? 'Un detalle hecho con cariño <span aria-hidden="true">✦</span>' : 'Un pequeño secreto te espera dentro <span aria-hidden="true">✦</span>';
+  document.getElementById('mailInstruction').textContent = open ? 'Con cariño, Nova Bella' : 'Una invitación especial para ti';
 }
 
 visitEnvelopeToggle.addEventListener('click', () => setVisitEnvelopeOpen(!visitMail.classList.contains('is-open')));
