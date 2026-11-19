@@ -26,7 +26,7 @@
       node.classList.toggle('badge-good', connected);
       node.classList.toggle('badge-wait', !connected);
     });
-    feedback.textContent = message || (connected ? 'Catálogo sincronizado con la API.' : 'No se ha conectado ninguna API.');
+    feedback.textContent = message || (connected ? 'Catálogo sincronizado con la API. Inventario, caja y costos necesitan sus endpoints propios para guardar operaciones en el servidor.' : 'No se ha conectado ninguna API.');
     document.getElementById('topEnvironmentStatus').lastChild.textContent = connected ? ' Catálogo conectado' : ' Panel de gestión';
     document.getElementById('productStatTitle').textContent = connected ? 'Modelos del servidor' : 'Modelos del catálogo';
     document.getElementById('productStatSource').textContent = connected ? 'en catálogo de la API' : 'en catálogo';
@@ -74,6 +74,7 @@
     renderProducts();
     renderOverview();
     window.novaInsights?.renderPage(activePage);
+    window.novaOperations?.refresh();
   }
 
   async function refreshProducts() {
@@ -92,6 +93,7 @@
     renderProducts();
     renderOverview();
     window.novaInsights?.renderPage(activePage);
+    window.novaOperations?.refresh();
   }
 
   async function connect(event) {

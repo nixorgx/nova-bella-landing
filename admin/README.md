@@ -71,3 +71,17 @@ La interfaz usa HTML, CSS y JavaScript nativo: no necesita `npm` ni compilar paq
 5. Si se desea actualizar también el sitio alojado, desplegar **por separado** la revisión correspondiente en su proyecto de ChatGPT Sites, conservando su acceso restringido.
 
 El manual general del repositorio contiene más información sobre métricas, backend, Docker y las tareas pendientes para el lanzamiento.
+
+## Inventario, lotes y caja (versión 2026)
+
+Los nuevos módulos se organizan así:
+
+1. **Catálogo:** crea primero la ficha del modelo con su precio de venta.
+2. **Ingreso de mercadería:** registra cada lote por **modelo, color y talla** (y código de etiqueta opcional), con cantidad, valor USD, distribución del primer y segundo pago, sus tipos de cambio y flete. El sistema calcula el costo total en Bs y el costo promedio unitario.
+3. **Inventario:** consulta existencias y alertas por variante; exporta el registro a CSV compatible con Excel.
+4. **Punto de venta:** selecciona la talla disponible o escanea su código, ajusta el precio final y registra un cobro con hasta dos métodos (efectivo, QR, tarjeta o transferencia). Se descuenta el stock y queda un registro de la venta.
+5. **Cambios de modelos:** registra cambios de un par por otra variante con existencias, sin diferencia de precio de lista. La operación repone el original y descuenta el reemplazo.
+6. **Análisis del negocio:** revisa rentabilidad de ventas con costo asociado y exporta las operaciones a CSV.
+7. **Equipo y permisos:** muestra la separación prevista entre propietario y vendedor. Los usuarios y restricciones reales deben imponerse en FastAPI; la pantalla no crea cuentas ni protege datos por sí sola.
+
+**Alcance actual:** estas operaciones nuevas se conservan solamente en el almacenamiento de cada navegador; todavía **no** existen endpoints FastAPI de variantes/lotes/caja/cambios que las persistan de forma compartida. Al conectar la API, el panel bloquea su registro local para no generar operaciones divergentes. Los reportes originales incluyen datos de ejemplo y no sustituyen contabilidad real. No introducir costos ni información personal real hasta completar autenticación por roles, transacciones y auditoría en PostgreSQL.

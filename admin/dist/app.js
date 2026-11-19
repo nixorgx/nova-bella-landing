@@ -1,7 +1,7 @@
 const STORE_KEY = 'nova-bella-control-prototipo-v1';
 const SITE_URL = 'https://nova-bella-boutique-2026.keenorbit34.chatgpt.site/';
 const PAGES = {
-  resumen: 'Resumen', analitica: 'Análisis del negocio', ventas: 'Ventas', clientes: 'Clientes frecuentes', catalogo: 'Catálogo', consultas: 'Consultas',
+  resumen: 'Resumen', inventario:'Inventario', ingresos:'Ingreso de mercadería', pos:'Punto de venta', cambios:'Cambios de modelos', equipo:'Equipo y permisos', analitica: 'Análisis del negocio', ventas: 'Ventas', clientes: 'Clientes frecuentes', catalogo: 'Catálogo', consultas: 'Consultas',
   contenido: 'Contenido web', conexiones: 'Conexiones y seguridad',
   actividad: 'Actividad', configuracion: 'Configuración'
 };
@@ -102,6 +102,7 @@ function openPage(page, updateHash = true) {
   if (page === 'consultas') renderInquiries();
   if (page === 'actividad') renderActivity();
   window.novaInsights?.renderPage(page);
+  window.novaOperations?.renderPage(page);
 }
 
 function closeSidebar() {
@@ -317,7 +318,7 @@ function bindEvents() {
   $('#exportData').addEventListener('click', () => exportJson({ exportedAt:new Date().toISOString(), note:'Respaldo del centro de control de Nova Bella.', ...state }, 'nova-bella-respaldo.json'));
   $('#resetDemo').addEventListener('click', () => askConfirm('Restablecer espacio','Se eliminarán los cambios guardados en este dispositivo, incluyendo productos, consultas, textos y actividad.', () => {
     if (window.novaBackend?.isConnected()) return toast('Desconecta la API antes de restablecer este espacio.');
-    state = initialState(); window.novaInsights?.reset(); persist(); loadContentFields(); renderProducts(); renderInquiries(); renderOverview(); toast('Espacio restablecido.');
+    state = initialState(); window.novaInsights?.reset(); window.novaOperations?.reset(); persist(); loadContentFields(); renderProducts(); renderInquiries(); renderOverview(); toast('Espacio restablecido.');
   }));
   $('#cancelConfirm').addEventListener('click', closeConfirm);
   $('#acceptConfirm').addEventListener('click', () => { const action = confirmAction; closeConfirm(); action?.(); });

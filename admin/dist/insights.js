@@ -285,7 +285,7 @@
     $('#saleMonthFilter').addEventListener('change',renderSales);
     $('#customerSearch').addEventListener('input',renderCustomers);
     $('#customerSegmentFilter').addEventListener('change',renderCustomers);
-    $('#addSale').addEventListener('click',openSaleModal);
+    $('#addSale').addEventListener('click',() => openPage('pos'));
     $('#addCustomer').addEventListener('click',openCustomerModal);
     $('#saleProduct').addEventListener('change',()=>{$('#saleUnitPrice').value=state.products.find(item=>item.id===$('#saleProduct').value)?.price||'';updateSaleTotal();});
     $('#saleQuantity').addEventListener('input',updateSaleTotal);
