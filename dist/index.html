@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#522d3d" />
+    <meta name="description" content="Nova Bella: una propuesta de boutique digital de calzado femenino en Cochabamba. Conoce las colecciones y descubre tu próximo par favorito." />
+    <title>Nova Bella — Cada paso, una declaración</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="script.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+    <div class="top-ribbon">
+      <span>UNA NUEVA FORMA DE VIVIR TU ESTILO</span>
+      <span class="ribbon-divider" aria-hidden="true">✦</span>
+      <span>COCHABAMBA, BOLIVIA</span>
+    </div>
+
+    <header class="site-header" id="inicio">
+      <div class="header-inner container-wide">
+        <a class="brand" href="#inicio" aria-label="Nova Bella, volver al inicio">
+          <span class="brand-name">NOVA<span class="brand-spark">✦</span>BELLA</span>
+          <span class="brand-caption">BOUTIQUE DE CALZADO</span>
+        </a>
+
+        <nav class="desktop-nav" aria-label="Navegación principal">
+          <a href="#colecciones">Colecciones</a>
+          <a href="#destacados">Destacados</a>
+          <a href="#nuestra-esencia">Nuestra esencia</a>
+          <a href="#visitanos">Visítanos</a>
+        </nav>
+
+        <div class="header-actions">
+          <button class="icon-button search-trigger" id="searchToggle" type="button" aria-label="Buscar modelos" aria-expanded="false" aria-controls="searchPanel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 5 5"></path></svg>
+          </button>
+          <button class="icon-button favorite-trigger" id="favoriteToggle" type="button" aria-label="Ver favoritos" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.3 5.4a5.3 5.3 0 0 0-7.5 0L12 6.2l-.8-.8a5.3 5.3 0 0 0-7.5 7.5L12 21l8.3-8.1a5.3 5.3 0 0 0 0-7.5Z"/></svg>
+            <span class="favorite-count" id="favoriteCount" hidden>0</span>
+          </button>
+          <a class="header-contact" href="https://wa.me/59171439946?text=Hola%20Nova%20Bella%2C%20quisiera%20consultar%20por%20sus%20modelos" target="_blank" rel="noopener noreferrer">Contáctanos</a>
+          <button class="icon-button menu-trigger" id="menuToggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <form class="search-panel" id="searchPanel" role="search" hidden>
+        <div class="container-wide search-panel-inner">
+          <label for="searchInput">Encuentra tu próximo favorito</label>
+          <input id="searchInput" type="search" autocomplete="off" placeholder="Busca botas, tacones, mocasines..." />
+          <button type="button" id="searchClose" aria-label="Cerrar búsqueda">Cerrar</button>
+        </div>
+      </form>
+
+      <nav class="mobile-menu" id="mobileMenu" aria-label="Menú móvil" hidden>
+        <a href="#colecciones">Colecciones</a>
+        <a href="#destacados">Destacados</a>
+        <a href="#nuestra-esencia">Nuestra esencia</a>
+        <a href="#visitanos">Visítanos</a>
+      </nav>
+    </header>
+
+    <main id="contenido">
+      <section class="hero" aria-label="Presentación Nova Bella">
+        <div class="hero-copy-wrap">
+          <div class="hero-content">
+            <div class="eyebrow"><span class="eyebrow-line"></span><span id="heroEyebrow">NUEVA TEMPORADA · CONCEPTO 2026</span></div>
+            <h1 id="heroTitle">Hay pasos<br />que <em>lo cambian</em><br />todo.</h1>
+            <p class="hero-description" id="heroDescription">Piezas que acompañan tu esencia. Estilo, carácter y ese detalle que hace que cada paso se sienta único.</p>
+            <div class="hero-buttons">
+              <a class="button button-primary" href="#colecciones">Explorar colección</a>
+              <a class="text-link" href="#nuestra-esencia">Conoce Nova Bella <span class="line-accent" aria-hidden="true"></span></a>
+            </div>
+          </div>
+          <div class="hero-footer">
+            <span>DISEÑADA PARA DESTACAR</span>
+            <div class="hero-pagination" role="group" aria-label="Elegir imagen destacada">
+              <button class="hero-dot is-active" data-slide="0" aria-label="Mostrar campaña uno" aria-current="true"></button>
+              <button class="hero-dot" data-slide="1" aria-label="Mostrar campaña dos"></button>
+              <button class="hero-dot" data-slide="2" aria-label="Mostrar campaña tres"></button>
+              <span id="heroSlideCount">01 / 03</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <img id="heroImage" class="hero-image" src="assets/campana-hero.webp" alt="Botines color vino en una sesión editorial de moda" fetchpriority="high" />
+          <div class="hero-visual-top"><span>THE NOVA EDIT</span><span>EST. COCHABAMBA</span></div>
+          <div class="hero-image-caption"><span class="caption-mini">UNA ACTITUD</span><span class="caption-large">Inconfundible.</span></div>
+          <span class="hero-visual-side">ELEGANCIA EN MOVIMIENTO — NOVA BELLA</span>
+        </div>
+      </section>
+
+      <div class="brand-ticker" aria-hidden="true">
+        <div class="ticker-track"><span>EXPRESA TU ESTILO</span><span>✳</span><span>CAMINA CON CONFIANZA</span><span>✳</span><span>NOVA BELLA</span><span>✳</span><span>EXPRESA TU ESTILO</span><span>✳</span><span>CAMINA CON CONFIANZA</span><span>✳</span><span>NOVA BELLA</span><span>✳</span></div>
+      </div>
+
+      <section class="section collections-section" id="colecciones">
+        <div class="container-wide">
+          <div class="section-intro reveal">
+            <div>
+              <span class="section-kicker"><span>✦</span> EDITORIAL DE ESTILO</span>
+              <h2>Tu estilo, <em>tus reglas.</em></h2>
+            </div>
+            <p>Hay un par para cada versión de ti. Descubre siluetas que hacen de lo cotidiano algo extraordinario.</p>
+          </div>
+
+          <div class="collections-grid">
+            <a class="collection-card collection-card-large reveal" href="#destacados" data-category-link="Tacones">
+              <div class="collection-background product-shot shot-ivory"></div>
+              <div class="collection-overlay"><span>01 / FEMENINA & ATEMPORAL</span><h3>Tacones</h3><span class="collection-cta">Descubrir estilos <span class="cta-circle">+</span></span></div>
+            </a>
+            <a class="collection-card reveal" href="#destacados" data-category-link="Botas">
+              <div class="collection-background product-shot shot-black"></div>
+              <div class="collection-overlay"><span>02 / CON CARÁCTER</span><h3>Botas & botines</h3><span class="collection-cta">Descubrir estilos <span class="cta-circle">+</span></span></div>
+            </a>
+            <a class="collection-card reveal" href="#destacados" data-category-link="Casuales">
+              <div class="collection-background product-shot shot-tan"></div>
+              <div class="collection-overlay"><span>03 / PARA CADA DÍA</span><h3>Casuales</h3><span class="collection-cta">Descubrir estilos <span class="cta-circle">+</span></span></div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section products-section" id="destacados">
+        <div class="container-wide">
+          <div class="products-heading reveal">
+            <div><span class="section-kicker"><span>✦</span> LA SELECCIÓN NOVA</span><h2>Diseños que <em>enamoran.</em></h2></div>
+            <p>Una pequeña muestra de lo que puede ser la experiencia de descubrir tus próximos favoritos.</p>
+          </div>
+          <div class="catalog-toolbar">
+            <div class="filter-list" role="group" aria-label="Filtrar modelos">
+              <button class="filter-button is-active" data-filter="Todos" type="button" aria-pressed="true">Todos</button>
+              <button class="filter-button" data-filter="Tacones" type="button" aria-pressed="false">Tacones</button>
+              <button class="filter-button" data-filter="Botas" type="button" aria-pressed="false">Botas & botines</button>
+              <button class="filter-button" data-filter="Casuales" type="button" aria-pressed="false">Casuales</button>
+            </div>
+            <span class="product-counter" id="productCounter">04 MODELOS</span>
+          </div>
+          <div class="product-grid" id="productGrid" aria-live="polite"></div>
+          <p class="demo-note"><span>ⓘ</span> Los modelos, fotografías y precios de esta sección son ilustrativos; no representan el inventario real de la tienda.</p>
+        </div>
+      </section>
+
+      <section class="editorial-section" id="nuestra-esencia">
+        <div class="editorial-image-wrap"><img src="assets/editorial-pasos.webp" alt="Zapatos color vino en una escena editorial sobre escalones de piedra" loading="lazy" /></div>
+        <div class="editorial-content">
+          <span class="section-kicker light"><span>✦</span> MÁS QUE ZAPATOS</span>
+          <h2>La mejor versión de ti <em>empieza por un paso.</em></h2>
+          <div class="editorial-divider"></div>
+          <p>Nova Bella celebra a las mujeres que eligen cómo quieren sentirse. Una boutique de calzado femenino en Cochabamba, donde la elegancia es una forma de expresión.</p>
+          <a class="button button-light" href="https://wa.me/59171439946?text=Hola%20Nova%20Bella%2C%20me%20gustar%C3%ADa%20conocer%20su%20cat%C3%A1logo%20actual" target="_blank" rel="noopener noreferrer">Conocer el catálogo real</a>
+          <div class="editorial-signature">Nova Bella <span>✳</span></div>
+        </div>
+      </section>
+
+      <section class="visit-section section" id="visitanos">
+        <div class="container-wide visit-grid">
+          <div class="visit-copy reveal">
+            <span class="section-kicker"><span>✦</span> TE ESPERAMOS</span>
+            <h2>Tu próximo par <em>te está esperando.</em></h2>
+            <p>¿Viste algo que te gusta? Ven a conocernos o escríbenos para consultar por los modelos disponibles, tallas y novedades.</p>
+            <div class="visit-actions">
+              <a class="button button-primary" href="https://wa.me/59171439946?text=Hola%20Nova%20Bella%2C%20quisiera%20informaci%C3%B3n%20sobre%20sus%20zapatos" target="_blank" rel="noopener noreferrer">Escríbenos por WhatsApp</a>
+              <a class="visit-map-link" href="https://www.google.com/maps/search/?api=1&query=Edificio+Sky+Box+Av+Hero%C3%ADnas+esquina+Antezana+Cochabamba" target="_blank" rel="noopener noreferrer">Cómo llegar</a>
+            </div>
+          </div>
+          <div class="visit-card reveal">
+            <div class="visit-card-top"><span>NUESTRA BOUTIQUE</span><span>CBBA / BO</span></div>
+            <div class="visit-card-center"><span class="location-icon" aria-hidden="true">✳</span><h3>Estamos en<br /><em>Cochabamba.</em></h3><p>Av. Heroínas, esquina Antezana<br />Edificio Sky Box · Piso 8, Of. 1B</p></div>
+            <div class="visit-card-bottom"><span>ATENCIÓN PERSONALIZADA</span><span>+591 71439946</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container-wide">
+        <div class="footer-top"><div><span class="footer-eyebrow">EL ESTILO TE ACOMPAÑA</span><div class="footer-wordmark">NOVA<span>✦</span>BELLA</div></div><a href="#inicio" class="back-to-top">Volver arriba</a></div>
+        <div class="footer-bottom"><span>© <span id="year"></span> Nova Bella · Cochabamba, Bolivia</span><span>Propuesta visual de landing page · Sin tienda online ni pagos activados</span><a href="https://wa.me/59171439946" target="_blank" rel="noopener noreferrer">WhatsApp</a></div>
+      </div>
+    </footer>
+
+    <dialog id="productDialog" class="product-dialog" aria-labelledby="dialogProductName">
+      <button type="button" class="dialog-close" id="dialogClose" aria-label="Cerrar vista rápida">×</button>
+      <div class="dialog-layout">
+        <div class="dialog-product-image product-shot" id="dialogProductImage" role="img" aria-label="Fotografía del producto"></div>
+        <div class="dialog-info"><span class="section-kicker"><span>✦</span> VISTA DE PRODUCTO</span><h2 id="dialogProductName"></h2><p id="dialogProductDescription"></p><span class="dialog-price" id="dialogPrice"></span><span class="size-label">¿QUÉ TALLA BUSCAS?</span><div class="sizes" id="dialogSizes" role="group" aria-label="Seleccionar talla"></div><a class="button button-primary dialog-whatsapp" id="dialogWhatsApp" href="https://wa.me/59171439946" target="_blank" rel="noopener noreferrer">Consultar modelo similar</a><p class="dialog-note">Modelo conceptual: consulta directamente con la tienda para confirmar disponibilidad y precio.</p></div>
+      </div>
+    </dialog>
+  </body>
+</html>
