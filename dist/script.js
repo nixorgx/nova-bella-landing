@@ -39,6 +39,7 @@ let selectedSize = null;
 let currentSpotlight = 'alba';
 let favorites = new Set();
 let toastTimer;
+let liveCatalog = false;
 
 try {
   const stored = JSON.parse(localStorage.getItem('nova-bella-favoritos') || '[]');
@@ -73,6 +74,9 @@ async function hydrateCatalog() {
       imageClass: visualForColor(item.color),
       imageUrl: typeof item.image_url === 'string' && /^https:\/\//i.test(item.image_url) ? item.image_url : ''
     }));
+    liveCatalog = true;
+    document.getElementById('catalogNote').textContent = 'ⓘ Modelos y precios consultados al catálogo de Nova Bella. Consulta por WhatsApp para confirmar tallas, existencias y cambios recientes; las imágenes sin fotografía propia son ilustrativas.';
+    document.getElementById('catalogFaqAnswer').textContent = 'Estos modelos provienen del catálogo publicado por la tienda. La disponibilidad por talla puede cambiar; escríbenos para confirmar existencias y precios antes de visitarnos.';
     favorites = new Set([...favorites].filter(id => products.some(product => product.id === id)));
     localStorage.setItem('nova-bella-favoritos', JSON.stringify([...favorites]));
     renderProducts();
@@ -265,7 +269,9 @@ function openProductDialog(id) {
   image.style.backgroundPosition = product.imageUrl ? 'center' : '';
   document.getElementById('dialogProductName').textContent = product.name;
   document.getElementById('dialogProductDescription').textContent = product.description;
-  document.getElementById('dialogPrice').textContent = `${product.price} · Referencial`;
+  document.getElementById('dialogPrice').textContent = `${product.price} · ${liveCatalog ? 'Precio de catálogo' : 'Referencial'}`;
+  document.getElementById('dialogDisclaimer').textContent = liveCatalog ? 'Consulta la disponibilidad de tu talla y confirma el precio con la tienda antes de comprar.' : 'Modelo conceptual: consulta directamente con la tienda para confirmar disponibilidad y precio.';
+  document.getElementById('dialogWhatsApp').textContent = liveCatalog ? 'Consultar disponibilidad' : 'Consultar modelo similar';
   document.getElementById('dialogSizes').innerHTML = [35,36,37,38,39,40].map(size => `<button type="button" data-size="${size}" aria-pressed="false">${size}</button>`).join('');
   updateDialogLink();
   dialog.showModal();
