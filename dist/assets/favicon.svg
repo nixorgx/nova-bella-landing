@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Nova Bella">
   <rect x="0" y="0" width="64" height="64" rx="13" fill="#512d3b" />
   <path d="M16 46V20h4.2L35 38V20h4v26h-4.1L20 28v18z" fill="#fff8f4" />
-  <path d="M47 14l1.6 5.1L54 21l-5.4 1.9L47 28l-1.6-5.1L40 21l5.4-1.9z" fill="#d3a0ad" />
+  <circle cx="47" cy="21" r="4.2" fill="#d3a0ad" />
   <path d="M16 51h31" stroke="#d3a0ad" stroke-width="1.5" />
 </svg>
