@@ -1,75 +1,103 @@
-# Nova Bella · Backend inicial
+# Nova Bella — API y base de datos
 
-Primera etapa de integración profesional entre la landing pública y el centro de control de Nova Bella.
+Backend de Nova Bella con **FastAPI + PostgreSQL 16**, ejecutado localmente mediante Docker Compose. Se utiliza junto con la landing pública y el centro de control. Esta carpeta no contiene la interfaz web; ver el [manual general](../README.md).
 
-## Alcance implementado
+## Funciones del servidor
 
-- API FastAPI con documentación OpenAPI (`/docs`).
-- PostgreSQL 16 para productos, perfiles por alias, ventas y auditoría.
-- Catálogo **público solo de lectura**: `GET /api/v1/public/products` devuelve únicamente los modelos publicados.
-- API administrativa autenticada: productos, perfiles (sin datos personales), ventas, reportes y bitácora.
-- Inicio administrativo mediante contraseña verificada con scrypt y tokens JWT de corta duración (30 minutos).
-- CORS restringido a los orígenes permitidos; sin contraseñas, claves ni tokens en el repositorio.
-- Archivado lógico de productos, para conservar referencias de ventas.
-- Operaciones de venta idempotentes cuando se envía `Idempotency-Key`.
-- Las tablas se inicializan al arrancar; antes del primer despliegue de producción habrá que introducir migraciones versionadas y copias de seguridad.
+- Catálogo público de productos publicados: `GET /api/v1/public/products`.
+- Administración con contraseña verificada mediante scrypt y tokens JWT temporales.
+- Operaciones de productos, perfiles por alias, ventas, indicadores y auditoría mediante rutas protegidas `/api/v1/admin/*`.
+- Archivado lógico de productos, claves opcionales de idempotencia al registrar ventas, validación de entradas y CORS limitado a orígenes autorizados.
+- Una cuenta PostgreSQL de aplicación con permisos limitados y distinta de la cuenta que inicializa el esquema.
 
-**No están implementados aún:** pagos, facturación fiscal, inventario por talla, autenticación de clientes, puntos de fidelización ni despliegue público HTTPS de la API. No cargar información personal real en el prototipo.
+**Alcance actual:** el centro de control puede conectar **su catálogo** a esta API. Las pantallas de Ventas, Clientes frecuentes, Consultas y Análisis aún requieren integración para leer y guardar centralizadamente la información. Tampoco hay pagos, facturación fiscal, inventario por talla ni cuentas de clientes.
 
-## Preparar Docker en Windows
+## Arranque local con recursos mínimos
 
-1. Instalar y abrir Docker Desktop, comprobando que `docker compose version` responda.
-2. Clonar el repositorio y entrar en `backend` desde PowerShell.
-3. Copiar `.env.example` a `.env`:
+Requisitos: Docker con Compose y Python 3 con las dependencias de `requirements.txt` para los scripts. Todos los comandos se ejecutan **dentro de `backend/`**; en Windows se puede usar PowerShell y en Linux/macOS una terminal.
 
-   ```powershell
-   Copy-Item .env.example .env
-   ```
+1. Crear el archivo de configuración privado a partir de `.env.example`:
 
-4. Generar las credenciales en un entorno Python con las dependencias instaladas:
+   - PowerShell: `Copy-Item .env.example .env`
+   - Linux/macOS: `cp .env.example .env`
 
-   ```powershell
+2. Instalar dependencias del script local y generar secretos con entrada oculta:
+
+   ```bash
    python -m pip install -r requirements.txt
    python -m scripts.generate_secrets
    ```
 
-   El script pedirá una contraseña administrativa y mostrará `JWT_SECRET` y `ADMIN_PASSWORD_HASH`. Copiar ambos valores a `.env`. Establecer un `POSTGRES_PASSWORD` aleatorio distinto (preferentemente alfanumérico, porque se usa dentro de una URL de conexión) y el correo de administración. No publicar ni enviar el `.env`.
+   El script solicita correo y contraseña administrativos, genera una clave JWT y un hash scrypt y los guarda en `.env`. También configura `POSTGRES_PASSWORD` si todavía está sin generar. **No copiar secretos a GitHub ni enviarlos por chat.**
 
-5. Levantar los contenedores:
+3. Iniciar únicamente PostgreSQL y esperar a que esté saludable:
 
-   ```powershell
-   docker compose up --build -d
+   ```bash
+   docker compose up -d postgres
    docker compose ps
    ```
 
-6. Comprobar:
+4. Preparar las tablas, índices y el usuario restringido **en la base local de este proyecto**:
 
-   ```powershell
-   Invoke-RestMethod http://127.0.0.1:8001/api/v1/health
+   ```bash
+   python -m scripts.configure_local_database
    ```
 
-   Abrir <http://127.0.0.1:8001/docs> para los endpoints.
+   Esta operación utiliza el contenedor `nova-bella-postgres-1` y reemplaza `APP_DATABASE_PASSWORD` por un valor aleatorio. No está diseñada para ejecutarse contra servidores externos o bases compartidas.
 
-La API se expone **solo en `127.0.0.1:8001`**. PostgreSQL usa `127.0.0.1:5434` para no interferir con la base de datos de Tunari Fire Monitor en el puerto 5432.
+5. Levantar solo la API:
 
-## Autenticación administrativa
+   ```bash
+   docker compose up -d --build api
+   docker compose ps -a
+   ```
 
-`POST /api/v1/auth/token` acepta JSON `{ "email": "...", "password": "..." }` y devuelve un `access_token` temporal. Las rutas `/api/v1/admin/*` requieren `Authorization: Bearer <token>`. No guardar el token en `localStorage` ni insertarlo en código del sitio. En producción, el panel deberá acceder a estos endpoints a través de un backend con HTTPS y control de acceso; no exponer Docker directamente.
+Solo se necesitan **dos contenedores**: `api` y `postgres`. La configuración limita concurrencia y tamaño de logs, y no añade herramientas de monitoreo ni servicios extra. Ambos puertos se exponen únicamente en `127.0.0.1`.
 
-## Integración con ambos frontends
+## Comprobar el estado
 
-- **Landing:** `dist/api-config.js` del proyecto público incluye `window.NOVA_BELLA_API_URL = '';`. Cuando exista una API en un dominio HTTPS, editar la URL y desplegar esa revisión. Entonces la landing consultará `GET /api/v1/public/products` sin token; solo mostrará productos publicados.
-- **Centro de control:** en «Conexiones y seguridad» está el formulario **Conectar catálogo de la tienda**. Introducir el dominio HTTPS de la API, el correo y la contraseña administrativa. Al autenticarse, las operaciones del módulo «Catálogo» irán al servidor. El token no persiste entre sesiones de navegador.
-- **Modo de prueba:** si no hay dominio HTTPS configurado, **ambos sitios mantienen su comportamiento de demostración**. La API Docker local solo escucha en `127.0.0.1`: no conecta directamente con los Sites alojados en Internet. Hace falta un despliegue protegido.
-- **Limitación de esta fase:** los módulos «Ventas», «Clientes frecuentes» y «Análisis» del centro de control siguen con datos ilustrativos, aunque existen endpoints iniciales en el backend. No se debe confundirlos con métricas reales.
+| Dirección | Función |
+| --- | --- |
+| `http://127.0.0.1:8001/api/v1/health` | Estado de la API. Debe responder con `status: ok`. |
+| `http://127.0.0.1:8001/docs` | Documentación interactiva de endpoints. |
+| `127.0.0.1:5434` | PostgreSQL local, solo para conexiones autorizadas. |
 
-### Siguientes tareas de producción
+```bash
+docker compose ps -a
+docker compose logs --tail=80 api
+```
 
-1. Desplegar esta API en un proveedor HTTPS y PostgreSQL administrado con copias de seguridad.
-2. Configurar el dominio de API y permitir exclusivamente los orígenes definitivos.
-3. Conectar el panel administrativo al dominio HTTPS, manteniendo credenciales fuera del repositorio y del almacenamiento persistente del navegador.
-4. Importar y verificar el catálogo real, fotos, precios, tallas y existencias.
-5. Migrar `localStorage` a la base de datos y crear roles de personal.
-6. Incorporar autenticación de clientes, consentimiento, vinculación de compras presenciales y Rewards.
+Si la API reinicia en bucle, revisar los logs y las variables privadas de `.env` (especialmente `JWT_SECRET`, `ADMIN_PASSWORD_HASH` y `APP_DATABASE_PASSWORD`).
 
-No publiques esta API con un `.env` de ejemplo ni almacenes datos personales antes de completar la revisión de seguridad y privacidad.
+Para detener ambos contenedores **sin borrar la base**:
+
+```bash
+docker compose down
+```
+
+**No ejecutar `docker compose down -v` sin un respaldo comprobado:** puede eliminar el volumen PostgreSQL.
+
+## Pruebas
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m unittest discover -s tests -v
+```
+
+Las pruebas de la revisión incluyen 14 casos; dos verificaciones específicas de PostgreSQL se omiten en la ejecución ordinaria sin base de pruebas. También existe `scripts/test_postgres.py` para validar permisos y concurrencia en una **base temporal aislada**. Ese script crea y elimina exclusivamente su base y rol de prueba, pero requiere una URL de mantenimiento y no se debe ejecutar contra infraestructura ajena ni sin respaldo y autorización.
+
+## Uso con las interfaces
+
+- **Landing:** introducir únicamente la URL pública HTTPS del backend en `dist/api-config.js` de la tienda, sin tokens ni claves. Si no hay API configurada, la landing conserva su catálogo visual incorporado.
+- **Centro de control:** en «Conexiones y seguridad», introducir la URL de la misma API HTTPS y credenciales administrativas. El token solo permanece en memoria durante la sesión; la conexión actual sincroniza el módulo Catálogo.
+- `http://127.0.0.1:8001` **no es una URL remota**: el Site publicado no puede utilizar la API local de otra computadora. El despliegue HTTPS y la base central requieren una configuración independiente.
+
+## Seguridad y lanzamiento
+
+- No subir `.env`, respaldos, contraseñas, tokens ni datos personales a este repositorio.
+- Mantener CORS limitado a las direcciones verificadas y requerir JWT para rutas de administración.
+- No conceder DDL, DELETE ni privilegios de superusuario a la cuenta de aplicación.
+- El archivo `../render.yaml` prepara una configuración de prueba HTTPS, pero **no crea ni acredita un despliegue remoto**.
+- Ver [`PRODUCCION.md`](PRODUCCION.md) para los requisitos pendientes de base de datos administrada, certificados, respaldos, políticas de acceso y comprobaciones reales antes del uso comercial.
+
+Esta guía describe los archivos incluidos en el repositorio, no los ajustes de un equipo particular.

@@ -1,7 +1,6 @@
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from urllib.parse import urlparse
 
 
 SCHEMA = [
@@ -33,6 +32,7 @@ SCHEMA = [
     "CREATE INDEX IF NOT EXISTS idx_sales_sold_at ON sales(sold_at)",
     "CREATE INDEX IF NOT EXISTS idx_sales_customer ON sales(customer_id)",
     "CREATE INDEX IF NOT EXISTS idx_audit_date ON audit_events(happened_at)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_alias_lower ON customers(lower(alias))",
 ]
 
 
@@ -72,7 +72,8 @@ class Database:
             except ImportError as exc:
                 raise RuntimeError("Instala psycopg[binary] para usar PostgreSQL.") from exc
             url = self.url.replace("postgres://", "postgresql://", 1)
-            return psycopg.connect(url, row_factory=dict_row, connect_timeout=5)
+            return psycopg.connect(url, row_factory=dict_row, connect_timeout=5,
+                                   options="-c statement_timeout=10000 -c idle_in_transaction_session_timeout=15000")
         path = self.url.removeprefix("sqlite:///")
         conn = sqlite3.connect(path, timeout=20, check_same_thread=False)
         conn.row_factory = sqlite3.Row

@@ -116,6 +116,7 @@ Al abrir la página aparece una composición visual principal con fotografías y
 - Los **indicadores** permiten saber en qué diapositiva se está.
 - El carrusel también puede avanzar automáticamente.
 - La sección mantiene un tamaño visual estable al cambiar de imagen.
+- El carrusel principal utiliza las **tres imágenes editoriales anteriores**; las fotos de modelos Nova Bella permanecen disponibles en las demás secciones.
 
 ### 2.2. Colecciones
 
@@ -459,7 +460,7 @@ Bolivianos, moneda usada en los precios y reportes.
 - **Python 3** para un servidor web estático y scripts de configuración.
 - **Docker** instalado e iniciado, con `docker compose` disponible (Docker Desktop en Windows y macOS).
 - **Git** para actualizar la copia del repositorio (opcional para ejecutar lo ya descargado).
-- Dependencias Python del backend, indicadas en `backend/requirements.txt`. Algunas revisiones también incluyen `backend/requirements-dev.txt`.
+- Dependencias Python del backend, indicadas en `backend/requirements.txt`; las de pruebas se encuentran en `backend/requirements-dev.txt`.
 
 ### 9.2. Descargar el proyecto y abrir las interfaces
 
@@ -514,17 +515,19 @@ python -m pip install -r requirements.txt
 python -m scripts.generate_secrets
 ```
 
-La versión publicada del generador solicita una contraseña y muestra `JWT_SECRET` y `ADMIN_PASSWORD_HASH` para introducirlos **únicamente en el archivo privado `.env`**; también se deben configurar `ADMIN_EMAIL` y un `POSTGRES_PASSWORD` aleatorio. Nunca publicar este archivo, secretos ni contraseñas. En sistemas que utilizan `python3`, reemplazar `python` por `python3` en los comandos de Python.
+El generador solicita correo administrativo y contraseña mediante entrada oculta, y **guarda** `JWT_SECRET`, `ADMIN_PASSWORD_HASH`, `ADMIN_EMAIL` y, si es necesario, `POSTGRES_PASSWORD` directamente en el archivo privado `.env`. Nunca publicar este archivo, secretos ni contraseñas. En sistemas que utilizan `python3`, reemplazar `python` por `python3` en los comandos de Python.
 
-Después, desde `backend/`:
+Después, desde `backend/`, preparar únicamente la base local y su cuenta de aplicación limitada:
 
 ```bash
-docker compose up -d --build
+docker compose up -d postgres
+python -m scripts.configure_local_database
+docker compose up -d --build api
 ```
 
-**Otras revisiones del proyecto** incorporan `scripts/configure_local_database.py` para preparar una cuenta PostgreSQL con permisos limitados y un archivo `requirements-dev.txt`. Esas mejoras todavía no están incluidas en la rama principal publicada a la fecha de este manual. Cuando estén disponibles, seguir las instrucciones que acompañen esa revisión; no ejecutar comandos para archivos inexistentes.
+El script de preparación crea tablas e índices y configura un usuario restringido **solamente en PostgreSQL local de Nova Bella**. No ejecutarlo contra una base compartida o remota. Para detalles y requisitos, consultar [`backend/README.md`](backend/README.md).
 
-> **Estado técnico (19/11/2026):** este manual reúne las interfaces publicadas y el alcance de una revisión más reciente del backend desarrollada localmente. La rama `main` todavía no incluye todos sus archivos (`scripts/configure_local_database.py`, `requirements-dev.txt`, `PRODUCCION.md` y `render.yaml`). No confundir esa documentación con un despliegue remoto verificado.
+> **Estado técnico:** el código y la configuración para preparar una prueba HTTPS (`render.yaml` y `backend/PRODUCCION.md`) se incluyen en el repositorio. Tener esos archivos en GitHub **no significa que la API ni su base de datos estén desplegadas remotamente**.
 
 ### 9.4. Comprobar que funciona
 
@@ -554,7 +557,7 @@ docker compose down
 
 ### 9.5. Ejecutar pruebas
 
-Desde la carpeta `backend`, con las dependencias de prueba instaladas. **Solo si existe** `requirements-dev.txt` en la revisión descargada, instalarlo primero:
+Desde la carpeta `backend`, instalar las dependencias de desarrollo:
 
 ```bash
 python -m pip install -r requirements-dev.txt
@@ -619,6 +622,7 @@ Para hacer el servicio público se necesitan **HTTPS**, secretos privados config
 | Archivo o carpeta | Propósito |
 | --- | --- |
 | `dist/` | Archivos estáticos publicados para la landing. |
+| `BRAND_ASSETS.md` | Procedencia de fotografías y recursos de identidad Nova Bella. |
 | `admin/dist/` | HTML, CSS, JavaScript y recursos estáticos del centro de control. |
 | `admin/README.md` | Guía de ejecución y límites del centro de control. |
 | `dist/api-config.js` | URL pública de la API que consulta la landing; no colocar secretos. |
@@ -626,10 +630,10 @@ Para hacer el servicio público se necesitan **HTTPS**, secretos privados config
 | `backend/compose.yaml` | Servicios Docker de API y PostgreSQL. |
 | `backend/.env.example` | Plantilla de configuración, sin credenciales reales. |
 | `backend/.env` | Credenciales locales privadas; ignorar en Git. |
-| `backend/scripts/` | Generación de secretos; la preparación avanzada de la base está en la revisión local pendiente de sincronizar. |
-| `backend/tests/` | Pruebas automáticas del servidor; parte de las pruebas nuevas aún están en la revisión local. |
-| `backend/PRODUCCION.md` | Guía de preparación HTTPS, **pendiente de subir a `main`**. |
-| `render.yaml` | Propuesta de configuración de despliegue, **pendiente de subir a `main`**. |
+| `backend/scripts/` | Generación de secretos, preparación local de la base y pruebas PostgreSQL aisladas. |
+| `backend/tests/` | Pruebas de la API, seguridad e integridad. |
+| `backend/PRODUCCION.md` | Guía de preparación HTTPS y requisitos de publicación remota. |
+| `render.yaml` | Propuesta de configuración de despliegue, **no ejecutada automáticamente**. |
 
 El **centro de control publicado** sigue siendo un Site independiente. Sus fuentes ahora están incluidas en `admin/dist/` del mismo repositorio, sin alterar la carpeta `dist/` de la landing ni los dos despliegues existentes.
 
@@ -719,7 +723,7 @@ Si Git avisa de cambios locales, conflictos o divergencia, conserva esas modific
 5. **Solo si cambió un Site:** publicar también esa revisión en su proyecto de ChatGPT Sites. Verificar la URL y los permisos después de desplegar.
 6. **Si cambió el backend:** desplegar y verificar la API por separado; no asumir que una modificación en GitHub reinicia Docker ni actualiza el servidor remoto.
 
-El código de la landing y el centro de control ya está reunido en GitHub. La **sincronización completa de los cambios avanzados del backend local** sigue siendo una tarea distinta y debe revisarse antes de integrarla.
+El código de la landing, el centro de control y la revisión avanzada del backend se encuentra organizado en GitHub. **La puesta en producción del backend y la integración de todas las pantallas con PostgreSQL siguen pendientes de comprobación y despliegue independientes.**
 
 ---
 

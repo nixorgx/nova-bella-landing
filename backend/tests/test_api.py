@@ -1,22 +1,33 @@
 import tempfile
 import unittest
-from datetime import date
+import os
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
+from urllib.parse import urlsplit
 
 from fastapi.testclient import TestClient
 
 from app.config import Settings
 from app.main import create_app
 from app.security import hash_password, verify_password
+from app.database import Database
 
 
 class ApiIntegrationTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         db = Path(self.tmp.name) / "nova.sqlite3"
-        settings = Settings(database_url=f"sqlite:///{db}", jwt_secret="t" * 48,
+        test_url = os.getenv("NOVA_BELLA_TEST_DATABASE_URL")
+        if test_url:
+            if not urlsplit(test_url).path.startswith('/nova_bella_test_'):
+                raise RuntimeError('Las pruebas PostgreSQL requieren una base temporal nova_bella_test_.')
+            with Database(os.environ['NOVA_BELLA_TEST_ADMIN_URL']).transaction() as session:
+                session.execute('TRUNCATE audit_events, sales, customers, products')
+        settings = Settings(database_url=test_url or f"sqlite:///{db}", jwt_secret="t" * 48,
                             admin_email="admin@example.test", admin_password_hash=hash_password("correcthorsebatterystaple"),
-                            allowed_origins=("http://localhost:5173",))
+                            allowed_origins=("http://localhost:5173",), initialize_schema=not bool(test_url))
+        self.settings = settings
         self.client = TestClient(create_app(settings))
         self.client.__enter__()
 
@@ -50,7 +61,7 @@ class ApiIntegrationTests(unittest.TestCase):
         self.assertNotIn("status", public["items"][0])
         customer = self.client.post("/api/v1/admin/customers", json={"alias":"Cliente 001"}, headers=headers)
         self.assertEqual(customer.status_code, 201)
-        sale_body = {"product_id":item["id"],"customer_id":customer.json()["id"],"quantity":2,"sold_at":date.today().isoformat()}
+        sale_body = {"product_id":item["id"],"customer_id":customer.json()["id"],"quantity":2,"sold_at":datetime.now(ZoneInfo('America/La_Paz')).date().isoformat()}
         sale_headers={**headers,"Idempotency-Key":"test-venta-0001"}
         sale=self.client.post("/api/v1/admin/sales", json=sale_body, headers=sale_headers)
         self.assertEqual(sale.status_code, 201, sale.text)

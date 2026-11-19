@@ -1,15 +1,20 @@
 import secrets
 import time
+import logging
+import sqlite3
 from collections import Counter, defaultdict
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timezone
 from uuid import uuid4
 from zoneinfo import ZoneInfo
+from threading import Lock
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.exceptions import RequestValidationError
+import psycopg
 
 from .config import Settings
 from .database import Database, utc_now
@@ -22,13 +27,18 @@ bearer = HTTPBearer(auto_error=False)
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
-    database = Database(settings.database_url)
+    database = Database(settings.database_url) if settings.database_url else None
     login_attempts: dict[str, list[float]] = {}
+    login_lock = Lock()
+    logger = logging.getLogger("nova_bella")
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         settings.validate()
-        database.initialize()
+        if settings.initialize_schema:
+            database.initialize()
+        elif not database.healthy():
+            raise RuntimeError("Base de datos no disponible.")
         yield
 
     app = FastAPI(title="Nova Bella API", version="0.1.0", lifespan=lifespan,
@@ -36,6 +46,23 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.allowed_origins),
                        allow_credentials=False, allow_methods=["GET", "POST", "PATCH", "DELETE"],
                        allow_headers=["Authorization", "Content-Type", "Idempotency-Key"], max_age=600)
+
+    @app.exception_handler(RequestValidationError)
+    async def invalid_request(request, exc):
+        return JSONResponse(status_code=422, content={"detail": [
+            {"loc": error["loc"], "type": error["type"], "msg": "Valor no válido."}
+            for error in exc.errors()
+        ]})
+
+    async def database_error(request, exc):
+        conflict = isinstance(exc, (sqlite3.IntegrityError, psycopg.IntegrityError))
+        logger.warning("database_error type=%s", type(exc).__name__)
+        return JSONResponse(status_code=409 if conflict else 503, content={
+            "detail": "Conflicto de datos." if conflict else "Servicio temporalmente no disponible."
+        }, headers={"Cache-Control": "no-store"})
+
+    app.add_exception_handler(sqlite3.Error, database_error)
+    app.add_exception_handler(psycopg.Error, database_error)
 
     @app.middleware("http")
     async def security_headers(request: Request, call_next):
@@ -68,18 +95,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.post("/api/v1/auth/token")
     def sign_in(payload: Credentials, request: Request):
-        key = f"{request.client.host if request.client else 'unknown'}:{payload.email.lower().strip()}"
+        key = request.client.host if request.client else 'unknown'
         now = time.monotonic()
-        login_attempts[key] = [moment for moment in login_attempts.get(key, []) if now - moment < 900]
-        if len(login_attempts[key]) >= 5:
-            raise HTTPException(status_code=429, detail="Demasiados intentos. Espera unos minutos.")
+        with login_lock:
+            for address in list(login_attempts):
+                recent = [moment for moment in login_attempts[address] if now - moment < 900]
+                if recent:
+                    login_attempts[address] = recent
+                else:
+                    del login_attempts[address]
+            if len(login_attempts.get(key, [])) >= 5 or (key not in login_attempts and len(login_attempts) >= 1024):
+                raise HTTPException(status_code=429, detail="Demasiados intentos. Espera unos minutos.", headers={"Retry-After": "900"})
+            login_attempts.setdefault(key, []).append(now)
         email = payload.email.lower().strip()
-        valid_email = secrets.compare_digest(email, settings.admin_email)
+        valid_email = secrets.compare_digest(email.encode(), settings.admin_email.encode())
         valid_password = verify_password(payload.password, settings.admin_password_hash)
         if not (valid_email and valid_password):
-            login_attempts[key].append(now)
+            logger.warning("admin_login_failed")
             raise HTTPException(status_code=401, detail="Credenciales incorrectas.")
-        login_attempts.pop(key, None)
+        with login_lock:
+            login_attempts.pop(key, None)
+        logger.info("admin_login_success")
         return {"access_token": create_token(settings.admin_email, settings.jwt_secret, settings.token_minutes),
                 "token_type": "bearer", "expires_in": settings.token_minutes * 60, "role": "admin"}
 
@@ -91,7 +127,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def public_products(response: Response):
         with database.transaction() as db:
             rows = db.all("SELECT id,name,category,color,price_bs,description,image_url,updated_at FROM products WHERE status='published' ORDER BY updated_at DESC,name ASC")
-        response.headers["Cache-Control"] = "public, max-age=60"
+        response.headers["Cache-Control"] = "no-store"
         return {"items": rows, "count": len(rows), "currency": "BOB"}
 
     @app.get("/api/v1/admin/products")
@@ -202,10 +238,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if idempotency_key is not None and not (8 <= len(idempotency_key) <= 128):
             raise HTTPException(status_code=422, detail="Idempotency-Key inválida.")
         sale_id=uuid4().hex
+        def same_sale(existing):
+            return (existing["product_id"] == payload.product_id
+                    and existing["customer_id"] == payload.customer_id
+                    and existing["quantity"] == payload.quantity
+                    and existing["sold_at"] == payload.sold_at.isoformat())
+
         with database.transaction() as db:
             if idempotency_key:
                 existing=db.one("SELECT * FROM sales WHERE idempotency_key=?", (idempotency_key,))
                 if existing:
+                    if not same_sale(existing):
+                        raise HTTPException(status_code=409, detail="Idempotency-Key ya usada para otra venta.")
                     return existing
             product=db.one("SELECT * FROM products WHERE id=? AND status!='archived'", (payload.product_id,))
             if not product:
@@ -213,9 +257,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             if payload.customer_id and not db.one("SELECT id FROM customers WHERE id=?", (payload.customer_id,)):
                 raise HTTPException(status_code=404, detail="Perfil de cliente no encontrado.")
             total=product["price_bs"]*payload.quantity
-            db.execute("INSERT INTO sales(id,product_id,product_name,customer_id,quantity,unit_price_bs,total_bs,sold_at,created_at,idempotency_key) VALUES(?,?,?,?,?,?,?,?,?,?)",
+            inserted = db.one("INSERT INTO sales(id,product_id,product_name,customer_id,quantity,unit_price_bs,total_bs,sold_at,created_at,idempotency_key) VALUES(?,?,?,?,?,?,?,?,?,?) ON CONFLICT(idempotency_key) DO NOTHING RETURNING id",
                        (sale_id,product["id"],product["name"],payload.customer_id,payload.quantity,
                         product["price_bs"],total,payload.sold_at.isoformat(),utc_now(),idempotency_key))
+            if not inserted:
+                existing = db.one("SELECT * FROM sales WHERE idempotency_key=?", (idempotency_key,))
+                if not same_sale(existing):
+                    raise HTTPException(status_code=409, detail="Idempotency-Key ya usada para otra venta.")
+                return existing
             audit(db, actor, "create", "sale", sale_id)
             row=db.one("SELECT * FROM sales WHERE id=?", (sale_id,))
         return row

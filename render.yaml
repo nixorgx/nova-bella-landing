@@ -1,0 +1,26 @@
+# Preparado para una prueba HTTPS; no crea una base de datos ni despliega por sí solo.
+services:
+  - type: web
+    name: nova-bella-api
+    runtime: docker
+    plan: free
+    autoDeployTrigger: "off"
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000 --no-proxy-headers --limit-concurrency 16
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: INITIALIZE_SCHEMA
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: TOKEN_MINUTES
+        value: "30"
+      - key: ALLOWED_ORIGINS
+        value: https://nova-bella-boutique-2026.keenorbit34.chatgpt.site,https://nova-bella-centro-control-2026.keenorbit34.chatgpt.site

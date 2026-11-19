@@ -156,9 +156,9 @@ h1 em, h2 em, h3 em { font-weight: 400; color: #ad7485; }
 .product-art { width: 100%; aspect-ratio: .9; overflow: hidden; position: relative; background: #f0e4e0; isolation: isolate; }
 .product-shot { background-size: cover; background-repeat: no-repeat; background-position: center; }
 .shot-ivory { background-image: url('assets/zapato-tacones.webp'); }
-.shot-black { background-image: url('assets/zapato-botas.webp'); }
-.shot-wine { background-image: url('assets/zapato-botines.webp'); }
-.shot-tan { background-image: url('assets/zapato-mocasines.webp'); }
+.shot-black { background-image: url('assets/nova-bella-texanas.webp'); }
+.shot-wine { background-image: url('assets/nova-bella-botines.webp'); }
+.shot-tan { background-image: url('assets/nova-bella-tenis.webp'); }
 .product-photo { position: absolute; inset: 0; transition: transform .7s var(--ease); }
 .product-card:hover .product-photo { transform: scale(1.075); }
 .product-badge { position: absolute; top: 15px; left: 15px; z-index: 1; padding: 9px 10px; background: rgba(255,254,252,.93); color: var(--wine); font-size: 9px; font-weight: 700; letter-spacing: .1em; }
@@ -753,3 +753,28 @@ h1 em, h2 em, h3 em { font-weight: 400; color: #ad7485; }
 }
 /* Imagen del inventario conectado; mantiene la misma geometría de cada tarjeta. */
 .live-product-photo { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+
+/* Identidad visual proporcionada por las publicaciones de Nova Bella. */
+.brand { flex-direction: row; align-items: center; gap: 10px; }
+.brand-logo { display: block; width: 43px; height: 43px; flex: 0 0 43px; object-fit: cover; border-radius: 9px; box-shadow: 0 2px 13px rgba(188,75,105,.16); }
+.brand-wordmark { display: flex; flex-direction: column; min-width: 0; }
+.brand-name { font-size: 23px; }
+.brand-caption { margin-top: 6px; letter-spacing: .17em; }
+.swatch-tan { background: #f9f6ef; border: 1px solid #cbbdb8; }
+.swatch-wine { background: #3c3035; }
+.footer-socials { display: flex; gap: 23px; align-items: center; }
+.footer-socials a { white-space: nowrap; }
+.hero-image { object-position: center 50%; }
+@media (max-width: 1080px) {
+  .brand { gap: 7px; width: 185px; }
+  .brand-logo { width: 37px; height: 37px; flex-basis: 37px; }
+  .brand-name { font-size: 20px; }
+  .brand-caption { font-size: 6.5px; }
+}
+@media (max-width: 650px) {
+  .brand { gap: 7px; width: auto; }
+  .brand-logo { width: 34px; height: 34px; flex-basis: 34px; }
+  .brand-name { font-size: 19px; }
+  .brand-caption { font-size: 6px; letter-spacing: .13em; }
+  .footer-socials { gap: 18px; }
+}

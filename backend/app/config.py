@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from urllib.parse import urlsplit
 
 
 @dataclass(frozen=True)
@@ -10,6 +11,7 @@ class Settings:
     admin_password_hash: str
     allowed_origins: tuple[str, ...]
     token_minutes: int = 30
+    initialize_schema: bool = True
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -20,15 +22,18 @@ class Settings:
             "http://localhost:5173,http://localhost:5174",
         )
         return cls(
-            database_url=os.getenv("DATABASE_URL", "sqlite:///./nova-bella.db"),
+            database_url=os.getenv("DATABASE_URL", ""),
             jwt_secret=os.getenv("JWT_SECRET", ""),
             admin_email=os.getenv("ADMIN_EMAIL", "").strip().lower(),
             admin_password_hash=os.getenv("ADMIN_PASSWORD_HASH", ""),
             allowed_origins=tuple(o.strip().rstrip("/") for o in origins.split(",") if o.strip()),
             token_minutes=int(os.getenv("TOKEN_MINUTES", "30")),
+            initialize_schema=os.getenv("INITIALIZE_SCHEMA", "true").lower() == "true",
         )
 
     def validate(self) -> None:
+        if not self.database_url:
+            raise RuntimeError("Configura DATABASE_URL antes de iniciar la API.")
         if len(self.jwt_secret) < 32:
             raise RuntimeError("JWT_SECRET debe contener al menos 32 caracteres aleatorios.")
         if not self.admin_email or "@" not in self.admin_email:
@@ -37,3 +42,9 @@ class Settings:
             raise RuntimeError("Configura ADMIN_PASSWORD_HASH con scripts/generate_secrets.py.")
         if self.token_minutes < 5 or self.token_minutes > 120:
             raise RuntimeError("TOKEN_MINUTES debe estar entre 5 y 120.")
+        for origin in self.allowed_origins:
+            url = urlsplit(origin)
+            if (not url.hostname or url.username or url.password or url.path or url.query or url.fragment
+                    or url.scheme not in ("http", "https")
+                    or (url.scheme == "http" and url.hostname not in ("localhost", "127.0.0.1", "::1"))):
+                raise RuntimeError("ALLOWED_ORIGINS requiere orígenes HTTPS o localhost sin rutas.")

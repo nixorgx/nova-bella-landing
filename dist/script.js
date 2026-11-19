@@ -1,13 +1,13 @@
 let products = [
-  { id: 'alba', name: 'Alba · Slingback', category: 'Tacones', color: 'Marfil', price: 'Bs 429', badge: 'ELEGANCIA DIARIA', imageClass: 'shot-ivory', description: 'Una silueta delicada y contemporánea, pensada para aportar elegancia a cada ocasión.' },
-  { id: 'vega', name: 'Vega · Bota alta', category: 'Botas', color: 'Negro', price: 'Bs 549', badge: 'ESTILO ICÓNICO', imageClass: 'shot-black', description: 'Una bota de líneas definidas que transforma cualquier look con carácter.' },
-  { id: 'roma', name: 'Roma · Botín', category: 'Botas', color: 'Vino', price: 'Bs 489', badge: 'NUEVO ESTILO', imageClass: 'shot-wine', description: 'Una textura de acabado intenso y una forma audaz para destacar sin esfuerzo.' },
-  { id: 'duna', name: 'Duna · Mocasín', category: 'Casuales', color: 'Caramelo', price: 'Bs 399', badge: 'VERSÁTIL', imageClass: 'shot-tan', description: 'Una propuesta cómoda y sofisticada para acompañarte durante todo el día.' }
+  { id: 'alba', name: 'Alba · Slingback', category: 'Tacones', color: 'Marfil', price: 'Consultar precio', badge: 'ELEGANCIA DIARIA', imageClass: 'shot-ivory', description: 'Una silueta delicada y contemporánea, pensada para aportar elegancia a cada ocasión.' },
+  { id: 'vega', name: 'Texanas · Via Marte', category: 'Botas', color: 'Negro', price: 'Consultar precio', badge: 'ESTILO ICÓNICO', imageClass: 'shot-black', description: 'Botas texanas de espíritu audaz, con textura marcada y un tacón que aporta carácter a cada look.' },
+  { id: 'roma', name: 'Botín · Via Marte', category: 'Botas', color: 'Negro', price: 'Consultar precio', badge: 'SOFISTICACIÓN', imageClass: 'shot-wine', description: 'Botín negro de líneas refinadas, diseñado para combinar presencia y comodidad en cada paso.' },
+  { id: 'duna', name: 'Tenis blanco · Via Marte', category: 'Casuales', color: 'Blanco', price: 'Consultar precio', badge: 'VERSÁTIL', imageClass: 'shot-tan', description: 'Tenis blancos de suela alta y diseño femenino, ideales para combinar con tus looks de todos los días.' }
 ];
 
 const slides = [
-  { eyebrow: 'NUEVA TEMPORADA · CONCEPTO 2026', title: 'No es solo<br>un par.<br><em>Es tu actitud.</em>', description: 'Hay zapatos que completan un look. Y otros que lo transforman. Descubre inspiración para tu siguiente gran paso.', image: 'assets/campana-hero.webp', alt: 'Botines color vino en una sesión editorial de moda', caption: 'Inconfundible.' },
-  { eyebrow: 'EL ESTILO ES UNA ACTITUD', title: 'Atrévete a<br><em>pisar fuerte.</em>', description: 'Haz espacio para nuevas versiones de ti. Una silueta puede cambiar por completo la forma de llevar tu día.', image: 'assets/editorial-pasos.webp', alt: 'Zapatos de tacón color vino sobre escalones de piedra', caption: 'Auténtica.' },
+  { eyebrow: 'LA SELECCIÓN NOVA BELLA', title: 'No es solo<br>un par.<br><em>Es tu actitud.</em>', description: 'Hay zapatos que completan un look. Y otros que lo transforman. Descubre inspiración para tu siguiente gran paso.', image: 'assets/campana-hero.webp', alt: 'Botines color vino en una sesión editorial de moda', caption: 'Inconfundible.' },
+  { eyebrow: 'VIA MARTE · NOVA BELLA', title: 'Atrévete a<br><em>pisar fuerte.</em>', description: 'Botines con personalidad, líneas elegantes y la libertad de llevarlos a tu manera.', image: 'assets/editorial-pasos.webp', alt: 'Zapatos de tacón color vino sobre escalones de piedra', caption: 'Auténtica.' },
   { eyebrow: 'PARA CADA VERSIÓN DE TI', title: 'Hay días que<br>merecen<br><em>destacar.</em>', description: 'De lo cotidiano a lo extraordinario: encuentra ese detalle que hace que todo el look se sienta diferente.', image: 'assets/zapato-tacones.webp', alt: 'Zapatos de tacón marfil sobre fondo rosa', caption: 'Esencial.' }
 ];
 
@@ -36,7 +36,7 @@ let currentSlide = 0;
 let slideTimer;
 let activeDialogProduct = null;
 let selectedSize = null;
-let currentSpotlight = 'alba';
+let currentSpotlight = 'vega';
 let favorites = new Set();
 let toastTimer;
 let liveCatalog = false;
@@ -75,8 +75,12 @@ async function hydrateCatalog() {
       imageUrl: typeof item.image_url === 'string' && /^https:\/\//i.test(item.image_url) ? item.image_url : ''
     }));
     liveCatalog = true;
-    document.getElementById('catalogNote').textContent = 'ⓘ Modelos y precios consultados al catálogo de Nova Bella. Consulta por WhatsApp para confirmar tallas, existencias y cambios recientes; las imágenes sin fotografía propia son ilustrativas.';
-    document.getElementById('catalogFaqAnswer').textContent = 'Estos modelos provienen del catálogo publicado por la tienda. La disponibilidad por talla puede cambiar; escríbenos para confirmar existencias y precios antes de visitarnos.';
+    if (!productSort.querySelector('option[value="price-asc"]')) {
+      productSort.add(new Option('Precio de menor a mayor', 'price-asc'));
+      productSort.add(new Option('Precio de mayor a menor', 'price-desc'));
+    }
+    document.getElementById('catalogNote').textContent = '♡ Guarda tus favoritos y descubre tallas, colores y novedades con nuestro equipo.';
+    document.getElementById('catalogFaqAnswer').textContent = 'Descubre los modelos de nuestra selección y consulta por WhatsApp las tallas y colores disponibles.';
     favorites = new Set([...favorites].filter(id => products.some(product => product.id === id)));
     localStorage.setItem('nova-bella-favoritos', JSON.stringify([...favorites]));
     renderProducts();
@@ -125,7 +129,7 @@ function renderProducts() {
   productGrid.innerHTML = filtered.map((product, index) => `
     <article class="product-card" style="animation-delay:${index * 65}ms">
       <div class="product-art">
-        ${product.imageUrl ? `<img class="product-photo live-product-photo" src="${escapeProductHtml(product.imageUrl)}" alt="${escapeProductHtml(product.name)}" loading="lazy">` : `<div class="product-photo product-shot ${product.imageClass}" role="img" aria-label="Imagen ilustrativa de ${escapeProductHtml(product.name)}"></div>`}
+        ${product.imageUrl ? `<img class="product-photo live-product-photo" src="${escapeProductHtml(product.imageUrl)}" alt="${escapeProductHtml(product.name)}" loading="lazy">` : `<div class="product-photo product-shot ${product.imageClass}" role="img" aria-label="Presentación de ${escapeProductHtml(product.name)}"></div>`}
         <span class="product-badge">${escapeProductHtml(product.badge)}</span>
         <button type="button" class="product-heart ${favorites.has(product.id) ? 'is-favorite' : ''}" data-favorite="${escapeProductHtml(product.id)}" aria-label="${favorites.has(product.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}: ${escapeProductHtml(product.name)}" aria-pressed="${favorites.has(product.id)}">${heartIcon}</button>
         <button type="button" class="product-quick" data-quick-view="${escapeProductHtml(product.id)}" aria-label="Ver detalles de ${escapeProductHtml(product.name)}">Vista rápida</button>
@@ -263,15 +267,15 @@ function openProductDialog(id) {
   selectedSize = null;
   const image = document.getElementById('dialogProductImage');
   image.className = `dialog-product-image product-shot ${product.imageClass}`;
-  image.setAttribute('aria-label', `Imagen ilustrativa de ${product.name}`);
+  image.setAttribute('aria-label', `Presentación de ${product.name}`);
   image.style.backgroundImage = product.imageUrl ? `url("${product.imageUrl.replace(/["\\]/g, '')}")` : '';
   image.style.backgroundSize = product.imageUrl ? 'cover' : '';
   image.style.backgroundPosition = product.imageUrl ? 'center' : '';
   document.getElementById('dialogProductName').textContent = product.name;
   document.getElementById('dialogProductDescription').textContent = product.description;
-  document.getElementById('dialogPrice').textContent = `${product.price} · ${liveCatalog ? 'Precio de catálogo' : 'Referencial'}`;
-  document.getElementById('dialogDisclaimer').textContent = liveCatalog ? 'Consulta la disponibilidad de tu talla y confirma el precio con la tienda antes de comprar.' : 'Modelo conceptual: consulta directamente con la tienda para confirmar disponibilidad y precio.';
-  document.getElementById('dialogWhatsApp').textContent = liveCatalog ? 'Consultar disponibilidad' : 'Consultar modelo similar';
+  document.getElementById('dialogPrice').textContent = product.price;
+  document.getElementById('dialogDisclaimer').textContent = 'Nuestro equipo puede ayudarte a elegir el modelo y la talla ideal.';
+  document.getElementById('dialogWhatsApp').textContent = 'Consultar disponibilidad';
   document.getElementById('dialogSizes').innerHTML = [35,36,37,38,39,40].map(size => `<button type="button" data-size="${size}" aria-pressed="false">${size}</button>`).join('');
   updateDialogLink();
   dialog.showModal();
