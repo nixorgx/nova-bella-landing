@@ -36,8 +36,32 @@ export function getPool(kind: PoolKind): Pool {
   const pools = (globalForPools.__inventarioPools ??= {});
   const existing = pools[kind];
   if (existing) return existing;
+  const connectionString = connectionStringFor(kind);
+  // Supavisor's TLS chain is signed by Supabase's own root CA. A bundled Node.js
+  // trust store does not recognize it, so configure the explicit CA in Vercel.
+  // Retain certificate + hostname verification: never disable rejectUnauthorized.
+  const suppliedCa = process.env.SUPABASE_CA_CERT?.replace(/\\n/g, "\n").trim();
+  let ssl: { ca: string; rejectUnauthorized: true } | undefined;
+  let safeConnectionString = connectionString;
+  if (suppliedCa) {
+    const url = new URL(connectionString);
+    if (!url.hostname.endsWith(".supabase.com") && !url.hostname.endsWith(".supabase.co")) {
+      throw new Error("Certificado Supabase configurado para un servidor no Supabase");
+    }
+    if (!suppliedCa.includes("-----BEGIN CERTIFICATE-----") || !suppliedCa.includes("-----END CERTIFICATE-----")) {
+      throw new Error("Certificado raíz de Supabase inválido");
+    }
+    // node-postgres replaces the ssl object whenever sslmode/sslrootcert is
+    // supplied in the URL. Strip only TLS query flags before passing ssl.ca.
+    for (const key of ["sslmode", "sslrootcert", "sslcert", "sslkey", "uselibpqcompat"]) {
+      url.searchParams.delete(key);
+    }
+    safeConnectionString = url.toString();
+    ssl = { ca: suppliedCa, rejectUnauthorized: true };
+  }
   const pool = new Pool({
-    connectionString: connectionStringFor(kind),
+    connectionString: safeConnectionString,
+    ...(ssl ? { ssl } : {}),
     max: POOL_MAX,
     idleTimeoutMillis: POOL_IDLE_MS,
   });
