@@ -46,6 +46,16 @@ export function getPool(kind: PoolKind): Pool {
   // The Supabase shared pooler routes connections by [role].[project-ref].
   // Direct connections use the plain role. Keep the secret and password intact.
   if (url.hostname.endsWith(".pooler.supabase.com")) {
+    // Supabase may provision a new project on aws-1 rather than aws-0 in the
+    // same region. The correct cluster cannot be inferred from the region.
+    // Only a dedicated, validated Supabase pooler hostname is accepted.
+    const selectedHost = process.env.SUPABASE_POOLER_HOST?.trim().toLowerCase();
+    if (selectedHost) {
+      if (!/^aws-[0-9]+-us-west-2\\.pooler\\.supabase\\.com$/.test(selectedHost)) {
+        throw new Error("SUPABASE_POOLER_HOST debe ser un host legítimo del pooler");
+      }
+      url.hostname = selectedHost;
+    }
     const ref = process.env.SUPABASE_PROJECT_REF?.trim();
     if (!ref || !/^[a-z0-9]{20}$/.test(ref)) {
       throw new Error("SUPABASE_PROJECT_REF no configurado para pooler");
