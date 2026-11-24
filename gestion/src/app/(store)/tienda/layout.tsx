@@ -5,6 +5,9 @@ import { getStoreInfo } from "@/features/store/public-data";
 import { StoreFooter } from "@/features/store/ui/StoreFooter";
 import { StoreHeader } from "@/features/store/ui/StoreHeader";
 
+// Store pages query PostgreSQL at request time; never prerender inventory during build.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: { default: "Tienda · NovaBella", template: "%s · NovaBella" },
