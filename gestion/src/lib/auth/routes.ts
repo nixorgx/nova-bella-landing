@@ -29,6 +29,7 @@ export const STORE_PATH = "/tienda";
 export function isPublicPath(pathname: string): boolean {
   return (
     pathname === "/api/v1/public/products" ||
+    pathname === "/api/v1/public/health" ||
     pathname === STORE_PATH ||
     pathname.startsWith(`${STORE_PATH}/`) ||
     pathname === "/sitemap.xml" ||
