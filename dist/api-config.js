@@ -1,3 +1,3 @@
-// Introducir solo la URL PUBLICA HTTPS del backend ya desplegado, sin claves ni tokens.
-// Si esta vacia, se muestra el catalogo incorporado en esta pagina.
-window.NOVA_BELLA_API_URL = '';
+// API pública de la tienda Nova Bella. Nunca colocar claves de PostgreSQL aquí.
+// El panel utiliza autenticación propia; este origen solo sirve contenido público autorizado.
+window.NOVA_BELLA_API_URL = 'https://nova-bella-gestion-privada-tfm16.vercel.app';
