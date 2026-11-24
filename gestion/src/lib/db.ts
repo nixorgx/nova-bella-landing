@@ -51,7 +51,7 @@ export function getPool(kind: PoolKind): Pool {
     // Only a dedicated, validated Supabase pooler hostname is accepted.
     const selectedHost = process.env.SUPABASE_POOLER_HOST?.trim().toLowerCase();
     if (selectedHost) {
-      if (!/^aws-[0-9]+-us-west-2\\.pooler\\.supabase\\.com$/.test(selectedHost)) {
+      if (!/^aws-[0-9]+-us-west-2[.]pooler[.]supabase[.]com$/.test(selectedHost)) {
         throw new Error("SUPABASE_POOLER_HOST debe ser un host legítimo del pooler");
       }
       url.hostname = selectedHost;
