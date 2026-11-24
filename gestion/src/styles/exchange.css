@@ -1,0 +1,56 @@
+/* Exchanges (Fase 5) and voided sales. Ink / leather; red only means "voided". */
+
+.detail-main { min-width: 0; }
+.badge--cambio { background: var(--accent-wash); color: var(--accent-strong); }
+.field__control--area { min-height: 5.5rem; padding-block: var(--space-2); resize: vertical; line-height: 1.4; }
+.check { display: flex; align-items: center; gap: var(--space-2); min-height: var(--touch); font-weight: 500; cursor: pointer; }
+.check input { width: 1.25rem; height: 1.25rem; accent-color: var(--ink); }
+
+.void-banner { display: grid; gap: var(--space-1); padding: var(--space-4); border: 2px solid var(--out); border-radius: var(--radius-lg); background: var(--out-wash); color: var(--out-ink); }
+.void-banner h2 { font-size: var(--text-lg); color: var(--out); }
+.void-banner p { margin: 0; }
+.panel--void { border-color: var(--out); }
+.panel--void .panel__head { border-bottom-color: var(--out-wash); }
+
+/* ---- exchange builder ---- */
+.exchange[aria-labelledby] { border-style: solid; }
+.xlines { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.xline { display: grid; gap: var(--space-3); padding: var(--space-3); border: 1px solid var(--rule); border-radius: var(--radius-md); background: var(--surface); transition: border-color var(--duration-fast), background-color var(--duration-fast); }
+.xline[data-selected] { border-color: var(--accent); background: #fff; box-shadow: inset 4px 0 0 var(--accent); }
+.xline[data-exhausted] { opacity: 0.6; }
+.xline__head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-3); align-items: start; }
+.xline__head .stepper { grid-column: 2; justify-self: start; }
+@media (min-width: 40rem) { .xline__head { grid-template-columns: auto minmax(0, 1fr) auto; } .xline__head .stepper { grid-column: auto; } }
+.xline__check { width: 1.4rem; height: 1.4rem; margin-top: 0.15rem; accent-color: var(--ink); }
+.xline__label { display: grid; gap: 1px; min-width: 0; cursor: pointer; }
+.xline__label strong { font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.1; overflow-wrap: anywhere; }
+.xline__label span { font-size: var(--text-sm); color: var(--ink-soft); }
+.xline__swap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-3); align-items: start; padding-top: var(--space-2); border-top: 1px solid var(--rule); }
+.xline__swap > .field__error { grid-column: 2; }
+.xline__arrow { font-family: var(--font-display); font-size: 1.5rem; line-height: 1.6; color: var(--accent); }
+
+.xsummary { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1.5px dashed var(--rose-soft); border-radius: var(--radius-lg); background: var(--surface-sunk); }
+.xsummary__title { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2) var(--space-3); font-size: var(--text-lg); }
+.xsummary__title .eyebrow { font-family: var(--font-body); }
+.xdiffs { list-style: none; margin: 0; padding: 0; display: grid; }
+.xdiffs li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); }
+.xdiffs li > span { display: grid; min-width: 0; }
+.xdiffs small { color: var(--ink-soft); }
+.xnet { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: linear-gradient(150deg, var(--rail-2), var(--rail)); color: var(--on-dark); font-weight: 600; }
+.xnet strong { font-family: var(--font-display); font-size: clamp(1.5rem, 1.2rem + 1.6vw, 2.1rem); line-height: 1; }
+.xnet--cobrar { background: linear-gradient(150deg, var(--rail-2), var(--rail)); }
+.xnet--devolver { background: var(--accent); }
+.xnet--ninguna { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+.xreason { display: grid; gap: var(--space-3); }
+@media (min-width: 40rem) { .xreason { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); } }
+.xoverride { padding: var(--space-2) var(--space-3); border: 1.5px solid var(--cost); border-radius: var(--radius-md); background: var(--cost-wash); }
+.xoverride summary { cursor: pointer; font-weight: 600; color: var(--cost); min-height: 2rem; display: flex; align-items: center; }
+.xoverride .field { margin-top: var(--space-2); }
+
+.xhistory { list-style: none; margin: 0; padding: 0; display: grid; }
+.xhistory > li { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--rule); }
+.xhistory > li:last-child { border-bottom: 0; }
+.xhistory p { margin: 0; }
+.xhistory__lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.xhistory__lines li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); font-size: var(--text-sm); }
+.xhistory__net { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); font-weight: 600; }

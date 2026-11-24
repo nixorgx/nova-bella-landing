@@ -1,13 +1,15 @@
 let products = [
-  { id: 'alba', name: 'Alba · Slingback', category: 'Tacones', color: 'Marfil', price: 'Consultar precio', badge: 'ELEGANCIA DIARIA', imageClass: 'shot-ivory', description: 'Una silueta delicada y contemporánea, pensada para aportar elegancia a cada ocasión.' },
-  { id: 'vega', name: 'Texanas · Via Marte', category: 'Botas', color: 'Negro', price: 'Consultar precio', badge: 'ESTILO ICÓNICO', imageClass: 'shot-black', description: 'Botas texanas de espíritu audaz, con textura marcada y un tacón que aporta carácter a cada look.' },
-  { id: 'roma', name: 'Botín · Via Marte', category: 'Botas', color: 'Negro', price: 'Consultar precio', badge: 'SOFISTICACIÓN', imageClass: 'shot-wine', description: 'Botín negro de líneas refinadas, diseñado para combinar presencia y comodidad en cada paso.' },
-  { id: 'duna', name: 'Tenis blanco · Via Marte', category: 'Casuales', color: 'Blanco', price: 'Consultar precio', badge: 'VERSÁTIL', imageClass: 'shot-tan', description: 'Tenis blancos de suela alta y diseño femenino, ideales para combinar con tus looks de todos los días.' }
+  { id: 'alba', name: 'Alba · Slingback', category: 'Tacones', color: 'Marfil', price: 'Bs 429', badge: 'ELEGANCIA DIARIA', imageClass: 'shot-ivory', description: 'Una silueta delicada y contemporánea, pensada para aportar elegancia a cada ocasión.' },
+  { id: 'vega', name: 'Vega · Bota alta', category: 'Botas', color: 'Negro', price: 'Bs 549', badge: 'ESTILO ICÓNICO', imageClass: 'shot-black', description: 'Una bota de líneas definidas que transforma cualquier look con carácter.' },
+  { id: 'roma', name: 'Roma · Botín', category: 'Botas', color: 'Vino', price: 'Bs 489', badge: 'NUEVO ESTILO', imageClass: 'shot-wine', description: 'Una textura de acabado intenso y una forma audaz para destacar sin esfuerzo.' },
+  { id: 'duna', name: 'Duna · Mocasín', category: 'Casuales', color: 'Caramelo', price: 'Bs 399', badge: 'VERSÁTIL', imageClass: 'shot-tan', description: 'Una propuesta cómoda y sofisticada para acompañarte durante todo el día.' }
 ];
 
+const editorialProducts = [...products];
+
 const slides = [
-  { eyebrow: 'LA SELECCIÓN NOVA BELLA', title: 'No es solo<br>un par.<br><em>Es tu actitud.</em>', description: 'Hay zapatos que completan un look. Y otros que lo transforman. Descubre inspiración para tu siguiente gran paso.', image: 'assets/campana-hero.webp', alt: 'Botines color vino en una sesión editorial de moda', caption: 'Inconfundible.' },
-  { eyebrow: 'VIA MARTE · NOVA BELLA', title: 'Atrévete a<br><em>pisar fuerte.</em>', description: 'Botines con personalidad, líneas elegantes y la libertad de llevarlos a tu manera.', image: 'assets/editorial-pasos.webp', alt: 'Zapatos de tacón color vino sobre escalones de piedra', caption: 'Auténtica.' },
+  { eyebrow: 'NUEVA TEMPORADA · CONCEPTO 2026', title: 'No es solo<br>un par.<br><em>Es tu actitud.</em>', description: 'Hay zapatos que completan un look. Y otros que lo transforman. Descubre inspiración para tu siguiente gran paso.', image: 'assets/campana-hero.webp', alt: 'Botines color vino en una sesión editorial de moda', caption: 'Inconfundible.' },
+  { eyebrow: 'EL ESTILO ES UNA ACTITUD', title: 'Atrévete a<br><em>pisar fuerte.</em>', description: 'Haz espacio para nuevas versiones de ti. Una silueta puede cambiar por completo la forma de llevar tu día.', image: 'assets/editorial-pasos.webp', alt: 'Zapatos de tacón color vino sobre escalones de piedra', caption: 'Auténtica.' },
   { eyebrow: 'PARA CADA VERSIÓN DE TI', title: 'Hay días que<br>merecen<br><em>destacar.</em>', description: 'De lo cotidiano a lo extraordinario: encuentra ese detalle que hace que todo el look se sienta diferente.', image: 'assets/zapato-tacones.webp', alt: 'Zapatos de tacón marfil sobre fondo rosa', caption: 'Esencial.' }
 ];
 
@@ -36,10 +38,11 @@ let currentSlide = 0;
 let slideTimer;
 let activeDialogProduct = null;
 let selectedSize = null;
-let currentSpotlight = 'vega';
+let currentSpotlight = 'alba';
 let favorites = new Set();
 let toastTimer;
 let liveCatalog = false;
+let catalogUnavailable = false;
 
 try {
   const stored = JSON.parse(localStorage.getItem('nova-bella-favoritos') || '[]');
@@ -59,33 +62,85 @@ const visualForColor = color => {
   return 'shot-ivory';
 };
 
+/* NOVA_BELLA_TEAM_INTEGRATION_V1 */
 async function hydrateCatalog() {
   const base = String(window.NOVA_BELLA_API_URL || '').trim().replace(/\/+$/, '');
-  if (!base || !/^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(base)) return;
+  // El dominio se configura al desplegar el nuevo sistema de gestión.
+  if (!base) return;
+  let origin;
   try {
-    const response = await fetch(`${base}/api/v1/public/products`, { headers: { Accept: 'application/json' }, credentials: 'omit', signal: AbortSignal.timeout(7000) });
-    if (!response.ok) throw Error(`API HTTP ${response.status}`);
-    const data = await response.json();
-    if (!Array.isArray(data.items)) throw Error('Respuesta del catalogo incorrecta');
-    products = data.items.map(item => ({
-      id: String(item.id), name: String(item.name), category: String(item.category),
-      color: String(item.color), price: `Bs ${Number(item.price_bs).toLocaleString('es-BO')}`,
-      description: String(item.description || ''), badge: 'DISPONIBLE',
-      imageClass: visualForColor(item.color),
-      imageUrl: typeof item.image_url === 'string' && /^https:\/\//i.test(item.image_url) ? item.image_url : ''
-    }));
+    const url = new URL(base);
+    if (url.href !== url.origin + '/' && url.href !== url.origin) throw Error('URL inválida');
+    if (url.protocol !== 'https:' && !(url.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(url.hostname))) throw Error('URL insegura');
+    origin = url.origin;
+  } catch {
+    document.getElementById('catalogNote').textContent = 'La conexión del catálogo necesita una URL HTTPS válida.';
+    return;
+  }
+  try {
+    const response = await fetch(origin + '/api/v1/public/products', {
+      headers: { Accept: 'application/json' }, credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(12000)
+    });
+    if (!response.ok) throw Error('Respuesta HTTP ' + response.status);
+    const payload = await response.json();
+    if (!Array.isArray(payload.items) || payload.items.length > 1000) throw Error('Catálogo inválido');
+    const mapped = payload.items.map(item => {
+      if (!item || typeof item.id !== 'string' || typeof item.name !== 'string' || typeof item.category !== 'string' || !Number.isFinite(Number(item.price_bs)) || Number(item.price_bs) <= 0) throw Error('Producto inválido');
+      const verifyUrl = (value, prefix) => {
+        if (typeof value !== 'string') return '';
+        try { const url = new URL(value, origin); return url.origin === origin && url.pathname.startsWith(prefix) ? url.href : ''; }
+        catch { return ''; }
+      };
+      const sizes = Array.isArray(item.sizes) ? item.sizes.slice(0, 40).filter(size => size && typeof size.label === 'string').map(size => ({ label: size.label, available: Boolean(size.available) })) : [];
+      const imageUrl = verifyUrl(item.image_url, '/tienda/img/');
+      const shopUrl = verifyUrl(item.shop_url, '/tienda/');
+      return {
+        id: item.id, name: item.name, category: item.category,
+        color: String(item.color || 'Consultar colores'),
+        price: 'Bs ' + Number(item.price_bs).toLocaleString('es-BO', { maximumFractionDigits: 2 }),
+        priceValue: Number(item.price_bs),
+        description: String(item.description || ''), badge: item.available ? 'DISPONIBLE' : 'AGOTADO',
+        imageClass: visualForColor(item.color), imageUrl, shopUrl, sizes, available: Boolean(item.available)
+      };
+    });
+    products = mapped;
     liveCatalog = true;
+    const categories = [...new Set(products.map(product => product.category))];
+    const slots = filterButtons.filter(button => button.dataset.filter !== 'Todos');
+    slots.forEach((button, index) => {
+      button.hidden = !categories[index];
+      if (categories[index]) { button.dataset.filter = categories[index]; button.textContent = categories[index]; }
+    });
+    if (categories.length > slots.length) {
+      const parent = slots[0]?.parentElement;
+      categories.slice(slots.length).forEach(category => {
+        const button = document.createElement('button');
+        button.className = 'filter-button'; button.type = 'button';
+        button.dataset.filter = category; button.textContent = category;
+        button.setAttribute('aria-pressed', 'false');
+        button.addEventListener('click', () => setCategory(category));
+        parent?.appendChild(button);
+        filterButtons.push(button);
+      });
+    }
+    currentCategory = 'Todos';
+    filterButtons.forEach(button => {
+      const active = button.dataset.filter === 'Todos';
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
     if (!productSort.querySelector('option[value="price-asc"]')) {
       productSort.add(new Option('Precio de menor a mayor', 'price-asc'));
       productSort.add(new Option('Precio de mayor a menor', 'price-desc'));
     }
-    document.getElementById('catalogNote').textContent = '♡ Guarda tus favoritos y descubre tallas, colores y novedades con nuestro equipo.';
-    document.getElementById('catalogFaqAnswer').textContent = 'Descubre los modelos de nuestra selección y consulta por WhatsApp las tallas y colores disponibles.';
+    document.getElementById('catalogNote').textContent = 'Modelos, precios y disponibilidad consultados al inventario actualizado de Nova Bella.';
+    document.getElementById('catalogFaqAnswer').textContent = 'Consulta las tallas disponibles y completa tu compra desde la tienda en línea.';
     favorites = new Set([...favorites].filter(id => products.some(product => product.id === id)));
-    localStorage.setItem('nova-bella-favoritos', JSON.stringify([...favorites]));
+    try { localStorage.setItem('nova-bella-favoritos', JSON.stringify([...favorites])); } catch { /* opcional */ }
     renderProducts();
   } catch (error) {
-    console.warn('Catalogo no disponible. Se mantienen las ilustraciones.', error.message);
+    document.getElementById('catalogNote').textContent = 'No pudimos actualizar los precios y existencias. Consulta directamente con Nova Bella.';
+    console.warn('Catálogo conectado no disponible:', error.message);
   }
 }
 
@@ -111,7 +166,7 @@ function visibleProducts() {
     const searchMatch = !term || [product.name, product.category, product.color].join(' ').toLocaleLowerCase('es').includes(term);
     return categoryMatch && favoriteMatch && searchMatch;
   });
-  const numericPrice = product => Number(product.price.replace(/[^0-9]/g,''));
+  const numericPrice = product => Number(product.priceValue ?? String(product.price).replace(/[^0-9]/g, ''));
   if (productSort.value === 'price-asc') filtered.sort((a,b) => numericPrice(a) - numericPrice(b));
   if (productSort.value === 'price-desc') filtered.sort((a,b) => numericPrice(b) - numericPrice(a));
   if (productSort.value === 'name') filtered.sort((a,b) => a.name.localeCompare(b.name,'es'));
@@ -122,14 +177,14 @@ function renderProducts() {
   const filtered = visibleProducts();
   productCounter.textContent = `${String(filtered.length).padStart(2, '0')} ${filtered.length === 1 ? 'MODELO' : 'MODELOS'}`;
   if (!filtered.length) {
-    productGrid.innerHTML = `<p class="no-products">${showOnlyFavorites ? 'No hay modelos favoritos con estos filtros. Guarda tus preferidos usando el corazón.' : 'No encontramos modelos para esa búsqueda. Prueba otra categoría.'}</p>`;
+    productGrid.innerHTML = `<p class="no-products">${catalogUnavailable ? 'No se pudo mostrar el catálogo. Intenta recargar la página.' : liveCatalog && products.length === 0 ? 'La tienda todavía no tiene modelos publicados.' : showOnlyFavorites ? 'No hay modelos favoritos con estos filtros. Guarda tus preferidos usando el corazón.' : 'No encontramos modelos para esa búsqueda. Prueba otra categoría.'}</p>`;
     updateFavoriteCount();
     return;
   }
   productGrid.innerHTML = filtered.map((product, index) => `
     <article class="product-card" style="animation-delay:${index * 65}ms">
       <div class="product-art">
-        ${product.imageUrl ? `<img class="product-photo live-product-photo" src="${escapeProductHtml(product.imageUrl)}" alt="${escapeProductHtml(product.name)}" loading="lazy">` : `<div class="product-photo product-shot ${product.imageClass}" role="img" aria-label="Presentación de ${escapeProductHtml(product.name)}"></div>`}
+        ${product.imageUrl ? `<img class="product-photo live-product-photo" src="${escapeProductHtml(product.imageUrl)}" alt="${escapeProductHtml(product.name)}" loading="lazy">` : `<div class="product-photo product-shot ${product.imageClass}" role="img" aria-label="Imagen ilustrativa de ${escapeProductHtml(product.name)}"></div>`}
         <span class="product-badge">${escapeProductHtml(product.badge)}</span>
         <button type="button" class="product-heart ${favorites.has(product.id) ? 'is-favorite' : ''}" data-favorite="${escapeProductHtml(product.id)}" aria-label="${favorites.has(product.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}: ${escapeProductHtml(product.name)}" aria-pressed="${favorites.has(product.id)}">${heartIcon}</button>
         <button type="button" class="product-quick" data-quick-view="${escapeProductHtml(product.id)}" aria-label="Ver detalles de ${escapeProductHtml(product.name)}">Vista rápida</button>
@@ -145,6 +200,7 @@ function renderProducts() {
 }
 
 function setCategory(category) {
+  if (liveCatalog && category !== 'Todos' && !products.some(item => item.category === category)) category = 'Todos';
   currentCategory = category;
   showOnlyFavorites = false;
   filterButtons.forEach(button => {
@@ -192,7 +248,7 @@ favoriteToggle.addEventListener('click', () => {
 });
 
 function selectSpotlight(id) {
-  const product = products.find(item => item.id === id);
+  const product = editorialProducts.find(item => item.id === id) || products.find(item => item.id === id);
   if (!product || id === currentSpotlight) return;
   currentSpotlight = id;
   spotlightPhoto.classList.add('is-changing');
@@ -261,22 +317,38 @@ function updateDialogLink() {
 }
 
 function openProductDialog(id) {
-  const product = products.find(item => item.id === id);
+  const product = products.find(item => item.id === id) || editorialProducts.find(item => item.id === id);
   if (!product) return;
   activeDialogProduct = product;
   selectedSize = null;
   const image = document.getElementById('dialogProductImage');
   image.className = `dialog-product-image product-shot ${product.imageClass}`;
-  image.setAttribute('aria-label', `Presentación de ${product.name}`);
+  image.setAttribute('aria-label', `Imagen ilustrativa de ${product.name}`);
   image.style.backgroundImage = product.imageUrl ? `url("${product.imageUrl.replace(/["\\]/g, '')}")` : '';
   image.style.backgroundSize = product.imageUrl ? 'cover' : '';
   image.style.backgroundPosition = product.imageUrl ? 'center' : '';
   document.getElementById('dialogProductName').textContent = product.name;
   document.getElementById('dialogProductDescription').textContent = product.description;
-  document.getElementById('dialogPrice').textContent = product.price;
-  document.getElementById('dialogDisclaimer').textContent = 'Nuestro equipo puede ayudarte a elegir el modelo y la talla ideal.';
-  document.getElementById('dialogWhatsApp').textContent = 'Consultar disponibilidad';
-  document.getElementById('dialogSizes').innerHTML = [35,36,37,38,39,40].map(size => `<button type="button" data-size="${size}" aria-pressed="false">${size}</button>`).join('');
+  document.getElementById('dialogPrice').textContent = `${product.price} · ${liveCatalog ? 'Precio de catálogo' : 'Referencial'}`;
+  document.getElementById('dialogDisclaimer').textContent = liveCatalog ? 'Consulta la disponibilidad de tu talla y confirma el precio con la tienda antes de comprar.' : 'Modelo conceptual: consulta directamente con la tienda para confirmar disponibilidad y precio.';
+  document.getElementById('dialogWhatsApp').textContent = liveCatalog ? 'Consultar disponibilidad' : 'Consultar modelo similar';
+  const sizes = product.sizes?.length ? product.sizes : (product.shopUrl ? [] : [35,36,37,38,39,40].map(size => ({ label: String(size), available: true })));
+  document.getElementById('dialogSizes').innerHTML = sizes.map(size =>
+    `<button type="button" data-size="${escapeProductHtml(size.label)}" aria-pressed="false" ${size.available ? '' : 'disabled title="Talla agotada"'}>${escapeProductHtml(size.label)}</button>`
+  ).join('') || '<span>Consulta las tallas en la tienda</span>';
+  let shopLink = document.getElementById('dialogBuyOnline');
+  if (!shopLink) {
+    shopLink = document.createElement('a');
+    shopLink.id = 'dialogBuyOnline';
+    shopLink.className = 'button button-outline dialog-whatsapp';
+    shopLink.target = '_blank'; shopLink.rel = 'noopener noreferrer';
+    document.getElementById('dialogWhatsApp').insertAdjacentElement('afterend', shopLink);
+  }
+  shopLink.hidden = !product.shopUrl;
+  if (product.shopUrl) {
+    shopLink.href = product.shopUrl;
+    shopLink.textContent = product.available ? 'Elegir talla y comprar' : 'Ver modelo en la tienda';
+  }
   updateDialogLink();
   dialog.showModal();
 }

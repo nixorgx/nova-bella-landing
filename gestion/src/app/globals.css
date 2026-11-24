@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+@import "../styles/base.css";
+@import "../styles/ui.css";
+/* Admin-only stylesheets are imported by src/app/(app)/layout.tsx and the login page, so the public store
+   does not ship them (its own styles live in styles/store.css). */

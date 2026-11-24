@@ -1,0 +1,61 @@
+/* Data visualization: one hue (dusty rose) for magnitude, a dashed gold-brown line for comparison, blue only for cost.
+   Hairline grid, thin marks, no borders around marks, values printed or in the tooltip + table. */
+
+.legend { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); list-style: none; margin: 0; padding: 0; font-size: var(--text-sm); color: var(--ink-soft); }
+.legend li { display: inline-flex; align-items: center; gap: var(--space-2); }
+.legend__swatch { width: 0.75rem; height: 0.75rem; border-radius: 3px; background: var(--chart-1); }
+.legend__key { display: inline-block; width: 1.1rem; height: 0; border-top: 2px dashed var(--chart-line); }
+
+/* ---- daily columns ---- */
+.dchart { display: grid; gap: var(--space-2); margin: 0; min-width: 0; }
+.dchart__cap { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-4); }
+.dchart__cap strong { font-family: var(--font-display); font-size: var(--text-lg); }
+.dchart__body { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr); gap: var(--space-2); }
+.dchart__y { position: relative; list-style: none; margin: 0; padding: 0; height: 11rem; font-size: var(--text-xs); color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.dchart__y li { position: absolute; right: 0; bottom: var(--at); transform: translateY(50%); }
+.dchart__plot { position: relative; height: 11rem; touch-action: pan-y; border-radius: var(--radius-sm); }
+.dchart__plot:focus-visible { box-shadow: var(--focus-ring); }
+.dchart__grid { position: absolute; inset-inline: 0; bottom: var(--at); border-top: 1px solid var(--rule); pointer-events: none; }
+.dchart__bars { position: absolute; inset: 0; display: flex; align-items: stretch; list-style: none; margin: 0; padding: 0; }
+.dchart__bars li { flex: 1 1 0; min-width: 0; display: flex; align-items: flex-end; justify-content: center; padding-inline: 1px; }
+@media (min-width: 40rem) { .dchart__bars li { padding-inline: 2px; } }
+.dchart__bar { display: block; width: 100%; max-width: 1.5rem; height: max(var(--h), 2px); background: var(--chart-1); border-radius: 6px 6px 0 0; transition: background-color var(--duration-fast), opacity var(--duration-fast); }
+.dchart__bar[data-empty] { background: var(--rule); height: 2px; border-radius: 0; }
+.dchart__bars li[data-active] .dchart__bar { background: var(--chart-1-strong); }
+.dchart__bars:has([data-active]) li:not([data-active]) .dchart__bar:not([data-empty]) { opacity: 0.55; }
+.dchart__line { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.dchart__line polyline { fill: none; stroke: var(--chart-line); stroke-width: 2; stroke-dasharray: 6 4; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.dchart__tip { position: absolute; z-index: 2; left: calc(var(--x) * 100%); top: 0; transform: translate(-50%, -105%); display: grid; gap: 1px; min-width: 8.5rem; padding: var(--space-2) var(--space-3); background: var(--rail); color: var(--on-dark); border-radius: var(--radius-md); font-size: var(--text-sm); pointer-events: none; box-shadow: 0 8px 18px -10px rgb(0 0 0 / 0.7); }
+.dchart__tip[data-flip] { transform: translate(-85%, -105%); }
+.dchart__tip strong { font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.1; }
+.dchart__tip-day { font-size: var(--text-xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--on-dark-soft); }
+.dchart__tip-note { font-size: var(--text-xs); color: var(--on-dark-soft); display: inline-flex; align-items: center; gap: var(--space-1); }
+.dchart__tip .legend__key { border-color: var(--on-dark-soft); }
+.dchart__x { display: flex; justify-content: space-between; margin: 0 0 0 calc(2.75rem + var(--space-2)); font-size: var(--text-xs); color: var(--ink-faint); }
+.dchart__table summary { cursor: pointer; font-size: var(--text-sm); color: var(--ink-soft); min-height: 2rem; display: flex; align-items: center; }
+.dchart__table[open] summary { margin-bottom: var(--space-2); }
+
+/* ---- ranked bars ---- */
+.rank { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.rank__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name value" "track track"; gap: var(--space-1) var(--space-3); align-items: end; }
+.rank__name { grid-area: name; display: grid; min-width: 0; }
+.rank__name small { color: var(--ink-faint); font-size: var(--text-xs); }
+.rank__value { grid-area: value; font-weight: 600; white-space: nowrap; text-align: right; }
+.rank__track { grid-area: track; display: block; height: 0.5rem; border-radius: 999px; background: var(--surface-sunk); overflow: hidden; }
+.rank__fill { display: block; height: 100%; width: var(--w); border-radius: 999px; background: var(--chart-1); }
+.rank--cost .rank__fill { background: var(--cost); }
+@media (min-width: 40rem) {
+  .rank__row { grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr) 7rem; grid-template-areas: "name track value"; align-items: center; }
+}
+
+/* ---- heatmap ---- */
+.heat-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
+.heat { width: 100%; border-collapse: separate; border-spacing: 2px; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.heat th { padding: var(--space-1) var(--space-2); font-size: var(--text-xs); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; white-space: nowrap; }
+.heat tbody th, .heat tfoot th { text-align: left; text-transform: none; letter-spacing: 0; font-size: var(--text-sm); color: var(--ink); min-width: 7rem; max-width: 12rem; white-space: normal; }
+.heat td { min-width: 2.4rem; padding: var(--space-2) var(--space-1); text-align: center; border-radius: 6px; }
+/* one rose ramp; the darkest step stays light enough for ink text (>= 4.5:1), so the number is always readable */
+.heat__cell { background: color-mix(in oklab, var(--heat-max) calc(var(--i) * 100%), var(--surface)); color: var(--ink); font-weight: 600; }
+.heat__total { font-weight: 800; }
+.heat tfoot td, .heat tfoot th { border-top: 1px solid var(--line); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .dchart__bar { transition: none; } }

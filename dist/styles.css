@@ -778,3 +778,7 @@ h1 em, h2 em, h3 em { font-weight: 400; color: #ad7485; }
   .brand-caption { font-size: 6px; letter-spacing: .13em; }
   .footer-socials { gap: 18px; }
 }
+
+/* Gestión Nova Bella: enlace de compra */
+#dialogBuyOnline[hidden] { display: none !important; }
+#dialogBuyOnline { margin-top: .6rem; }
