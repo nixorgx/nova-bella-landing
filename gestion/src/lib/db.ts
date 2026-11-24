@@ -42,9 +42,21 @@ export function getPool(kind: PoolKind): Pool {
   // Retain certificate + hostname verification: never disable rejectUnauthorized.
   const suppliedCa = process.env.SUPABASE_CA_CERT?.replace(/\\n/g, "\n").trim();
   let ssl: { ca: string; rejectUnauthorized: true } | undefined;
-  let safeConnectionString = connectionString;
+  const url = new URL(connectionString);
+  // The Supabase shared pooler routes connections by [role].[project-ref].
+  // Direct connections use the plain role. Keep the secret and password intact.
+  if (url.hostname.endsWith(".pooler.supabase.com")) {
+    const ref = process.env.SUPABASE_PROJECT_REF?.trim();
+    if (!ref || !/^[a-z0-9]{20}$/.test(ref)) {
+      throw new Error("SUPABASE_PROJECT_REF no configurado para pooler");
+    }
+    const role = decodeURIComponent(url.username);
+    if (!role.endsWith(`.${ref}`)) {
+      if (role.includes(".")) throw new Error("La conexión PostgreSQL apunta a otro proyecto Supabase");
+      url.username = `${role}.${ref}`;
+    }
+  }
   if (suppliedCa) {
-    const url = new URL(connectionString);
     if (!url.hostname.endsWith(".supabase.com") && !url.hostname.endsWith(".supabase.co")) {
       throw new Error("Certificado Supabase configurado para un servidor no Supabase");
     }
@@ -56,9 +68,9 @@ export function getPool(kind: PoolKind): Pool {
     for (const key of ["sslmode", "sslrootcert", "sslcert", "sslkey", "uselibpqcompat"]) {
       url.searchParams.delete(key);
     }
-    safeConnectionString = url.toString();
     ssl = { ca: suppliedCa, rejectUnauthorized: true };
   }
+  const safeConnectionString = url.toString();
   const pool = new Pool({
     connectionString: safeConnectionString,
     ...(ssl ? { ssl } : {}),
