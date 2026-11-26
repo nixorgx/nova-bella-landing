@@ -32,7 +32,16 @@ function makeConnection(kind) {
      client = new Client(makeConnection(kind));
      await client.connect();
      await client.query("select 1");
-     if (kind === "AUTH") await client.query("select * from auth_login_lookup($1)", ["naty"]);
+     if (kind === "AUTH") {
+       await client.query("select * from auth_login_lookup($1)", ["naty"]);
+       await client.query("begin");
+       try {
+         await client.query("select * from auth_reserve_attempt($1, $2, $3)", ["nova:build:preflight", 5, 60]);
+         await client.query("select auth_clear_attempts($1)", ["nova:build:preflight"]);
+       } finally {
+         await client.query("rollback");
+       }
+     }
      console.log("[NovaBella build database preflight] " + kind + ": PASS");
    } catch (e) {
      const err = e && typeof e === "object" ? e : {};
