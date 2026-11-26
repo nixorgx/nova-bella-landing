@@ -67,6 +67,8 @@ async function hydrateCatalog() {
   const base = String(window.NOVA_BELLA_API_URL || '').trim().replace(/\/+$/, '');
   // El dominio se configura al desplegar el nuevo sistema de gestión.
   if (!base) return;
+  productGrid.hidden = true;
+  productGrid.setAttribute('aria-busy', 'true');
   let origin;
   try {
     const url = new URL(base);
@@ -75,6 +77,11 @@ async function hydrateCatalog() {
     origin = url.origin;
   } catch {
     document.getElementById('catalogNote').textContent = 'La conexión del catálogo necesita una URL HTTPS válida.';
+    products = [];
+    catalogUnavailable = true;
+    renderProducts();
+    productGrid.hidden = false;
+    productGrid.removeAttribute('aria-busy');
     return;
   }
   try {
@@ -147,6 +154,9 @@ async function hydrateCatalog() {
     renderProducts();
     document.getElementById('catalogNote').textContent = 'Catálogo temporalmente no disponible. Consulta directamente con Nova Bella.';
     console.warn('Catálogo conectado no disponible:', error.message);
+  } finally {
+    productGrid.hidden = false;
+    productGrid.removeAttribute('aria-busy');
   }
 }
 
