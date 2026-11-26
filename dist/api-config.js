@@ -1,3 +1,3 @@
-// API pública de la tienda Nova Bella. Nunca colocar claves de PostgreSQL aquí.
-// El panel utiliza autenticación propia; este origen solo sirve contenido público autorizado.
-window.NOVA_BELLA_API_URL = 'https://nova-bella-gestion-privada-tfm16.vercel.app';
+// Origen HTTPS de la tienda y API pública del sistema de gestión de Nova Bella.
+// Nunca incluir credenciales ni variables privadas en esta página pública.
+window.NOVA_BELLA_API_URL = 'https://nova-bella-gestion-privada.vercel.app';
