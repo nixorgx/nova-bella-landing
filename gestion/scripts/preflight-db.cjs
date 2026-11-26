@@ -1,0 +1,44 @@
+// One-time deployment diagnostic. Never log database connection strings, credentials or query results.
+const { Client } = require("pg");
+
+function makeConnection(kind) {
+  const value = process.env["DATABASE_URL_" + kind];
+  if (!value) throw Object.assign(new Error("missing database URL"), { code: "MISSING_URL" });
+  const url = new URL(value);
+  const host = process.env.SUPABASE_POOLER_HOST?.trim().toLowerCase();
+  if (url.hostname.endsWith(".pooler.supabase.com")) {
+    if (host) {
+      if (!/^aws-[0-9]+-us-west-2\.pooler\.supabase\.com$/.test(host)) throw new Error("invalid Supabase pooler host");
+      url.hostname = host;
+    }
+    const ref = process.env.SUPABASE_PROJECT_REF?.trim();
+    if (!ref || !/^[a-z0-9]{20}$/.test(ref)) throw new Error("invalid project reference");
+    const role = decodeURIComponent(url.username);
+    if (!role.endsWith("." + ref)) {
+      if (role.includes(".")) throw new Error("wrong project reference");
+      url.username = role + "." + ref;
+    }
+  }
+  const ca = process.env.SUPABASE_CA_CERT?.replace(/\\n/g, "\n").trim();
+  if (ca) {
+    for (const k of ["sslmode", "sslrootcert", "sslcert", "sslkey", "uselibpqcompat"]) url.searchParams.delete(k);
+  }
+  return { connectionString: url.toString(), ...(ca ? { ssl: { ca, rejectUnauthorized: true } } : {}), connectionTimeoutMillis: 12000 };
+}
+(async () => {
+ for (const kind of ["AUTH", "PUBLIC", "SUPERADMIN"]) {
+   let client;
+   try {
+     client = new Client(makeConnection(kind));
+     await client.connect();
+     await client.query("select 1");
+     if (kind === "AUTH") await client.query("select * from auth_login_lookup($1)", ["naty"]);
+     console.log("[NovaBella build database preflight] " + kind + ": PASS");
+   } catch (e) {
+     const err = e && typeof e === "object" ? e : {};
+     const code = String(err.code || err.cause?.code || "UNKNOWN").replace(/[^A-Za-z0-9_]/g, "").slice(0,48);
+     const type = code === "UNKNOWN" ? (/certificate/i.test(err.message||"") ? "CERTIFICATE" : /tenant/i.test(err.message||"") ? "TENANT" : /password/i.test(err.message||"") ? "PASSWORD" : "UNKNOWN") : code;
+     console.error("[NovaBella build database preflight] " + kind + ": FAIL category=" + type);
+   } finally { if (client) await client.end().catch(()=>{}); }
+ }
+})().catch(() => { console.error("[NovaBella build database preflight] UNEXPECTED"); });
