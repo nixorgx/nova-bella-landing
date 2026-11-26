@@ -139,7 +139,13 @@ async function hydrateCatalog() {
     try { localStorage.setItem('nova-bella-favoritos', JSON.stringify([...favorites])); } catch { /* opcional */ }
     renderProducts();
   } catch (error) {
-    document.getElementById('catalogNote').textContent = 'No pudimos actualizar los precios y existencias. Consulta directamente con Nova Bella.';
+    // Never show example products as if they were real inventory when the live API fails.
+    products = [];
+    liveCatalog = true;
+    catalogUnavailable = true;
+    favorites.clear();
+    renderProducts();
+    document.getElementById('catalogNote').textContent = 'Catálogo temporalmente no disponible. Consulta directamente con Nova Bella.';
     console.warn('Catálogo conectado no disponible:', error.message);
   }
 }
