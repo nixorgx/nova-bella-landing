@@ -1,0 +1,90 @@
+/* Design tokens. "Boutique de lujo suave": warm ivory, dusty rose and blush, deep wine for
+   strong actions, champagne gold as a quiet accent and sage for success.
+   Semantic colors are reserved for stock/state; --cost (deep blue) is superadmin-only.
+   Every text/background pair below was checked against WCAG 2.2 AA (>= 4.5:1). */
+:root {
+  --paper: #f7f0e8;
+  --surface: #fffaf6;
+  --surface-sunk: #efe3d8;
+  --ink: #2a1722;
+  --ink-soft: #5b4553;
+  --ink-faint: #6a5260;
+  --rule: #e3d4c9;
+  --rule-strong: #2a1722;
+  --line: #ead9ce;
+  --field-line: #8a7280;
+
+  --accent: #6e2447;
+  --accent-strong: #541a37;
+  --accent-ink: #fff7f2;
+  --accent-wash: #f7dfe1;
+  --accent-wash-2: #fbeeee;
+  --rose: #a23b60;
+  --rose-soft: #d98aa3;
+
+  --gold: #b99256;
+  --gold-ink: #6b4d12;
+  --gold-wash: #f4e8cf;
+
+  --ok: #2f6547;
+  --ok-ink: #1d4630;
+  --ok-wash: #dcebdd;
+  --low: #744a00;
+  --low-ink: #5a3900;
+  --low-wash: #f6e5bf;
+  --out: #a1232d;
+  --out-ink: #6e1520;
+  --out-wash: #f8d9d6;
+  --cost: #2b4a85;
+  --cost-wash: #dde7f6;
+
+  --rail: #2c1527;
+  --rail-2: #3d1c35;
+  --rail-ink: #f6e8e6;
+  --rail-dim: #c9afbf;
+  --on-dark: #fff7f2;
+  --on-dark-soft: #ead3da;
+
+  --chart-1: #a23b60;
+  --chart-1-strong: #6e2447;
+  --chart-line: #6b4d12;
+  --heat-max: #cf7a98;
+
+  --font-display: var(--font-playfair), "Iowan Old Style", Georgia, serif;
+  --font-body: var(--font-dmsans), system-ui, sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: clamp(1.625rem, 1.25rem + 1.4vw, 2.375rem);
+  --text-brand: clamp(2.75rem, 1.5rem + 5vw, 5.25rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2.25rem;
+  --space-7: 3.5rem;
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
+
+  /* soft, with intent: small controls < cards < hero surfaces */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  --touch: 2.75rem;
+  --rail-width: 15rem;
+
+  --duration-fast: 140ms;
+  --duration-normal: 240ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --shadow-card: 0 1px 2px rgb(74 28 55 / 0.06), 0 14px 30px -20px rgb(74 28 55 / 0.38);
+  --shadow-lift: 0 2px 4px rgb(74 28 55 / 0.08), 0 18px 34px -18px rgb(74 28 55 / 0.45);
+  --shadow-pop: 0 4px 10px rgb(74 28 55 / 0.1), 0 28px 48px -20px rgb(74 28 55 / 0.55);
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent);
+  --focus-ring-dark: 0 0 0 2px var(--rail), 0 0 0 4px var(--accent-wash);
+}

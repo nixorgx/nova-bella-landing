@@ -1,0 +1,68 @@
+/* App shell: top bar + scrolling pill strip on phones, a plum rail on desktop. */
+.shell { display: grid; min-height: 100dvh; grid-template-rows: auto 1fr; }
+.shell__rail {
+  min-width: 0; position: sticky; top: 0; z-index: 20; color: var(--rail-ink);
+  background:
+    radial-gradient(24rem 16rem at 0% 0%, rgb(185 146 86 / 0.18), transparent 60%),
+    linear-gradient(180deg, var(--rail-2), var(--rail));
+}
+.shell__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) var(--gutter); min-width: 0; }
+.shell__top > * { min-width: 0; }
+
+.brand { display: flex; align-items: center; gap: var(--space-3); margin: 0; }
+.brand__mark { flex: none; width: 2rem; height: 2rem; color: var(--gold); }
+.brand__text { display: grid; gap: 3px; }
+.brand__word { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; letter-spacing: 0.005em; line-height: 1; color: var(--on-dark); }
+.brand__word em { font-style: normal; color: var(--rose-soft); }
+.brand small { display: block; font-family: var(--font-body); font-weight: 500; font-size: 0.625rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rail-dim); }
+/* narrow phones: the tagline would push the account block out of the viewport */
+@media (max-width: 39.99rem) { .brand small { display: none; } .account__who span { display: none; } }
+
+.nav { display: flex; gap: var(--space-1); overflow-x: auto; padding: 0 var(--gutter) var(--space-3); scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+.nav a {
+  position: relative; flex: none; display: flex; align-items: center;
+  min-height: var(--touch); padding: 0 var(--space-4);
+  border-radius: var(--radius-pill); color: var(--rail-dim); font-weight: 500; text-decoration: none; white-space: nowrap;
+  transition: background-color var(--duration-fast), color var(--duration-fast), transform var(--duration-fast) var(--ease-out);
+}
+.nav a:hover { color: var(--on-dark); background: rgb(255 255 255 / 0.08); }
+.nav a:active { background: rgb(255 255 255 / 0.14); transform: scale(0.98); }
+.nav a[aria-current="page"] { color: var(--accent-strong); background: var(--accent-wash); font-weight: 700; }
+.nav a:focus-visible { box-shadow: var(--focus-ring-dark); }
+
+.account { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-sm); }
+.account__avatar { display: none; flex: none; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: 50%; background: linear-gradient(145deg, var(--gold), #8d6a30); color: #2a1722; font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; box-shadow: 0 0 0 2px rgb(255 255 255 / 0.12); }
+.account__me { display: flex; align-items: center; gap: var(--space-3); min-width: 0; padding: 0.25rem 0.5rem; margin: -0.25rem -0.5rem; border-radius: var(--radius-md); color: inherit; text-decoration: none; transition: background-color var(--duration-fast); }
+.account__me:hover { background: rgb(255 255 255 / 0.08); }
+.account__me:active { background: rgb(255 255 255 / 0.14); }
+.account__me:focus-visible { box-shadow: var(--focus-ring-dark); }
+.account__hint { display: none; margin-top: 2px; font-size: var(--text-xs); color: var(--rose-soft); }
+.account__me:hover .account__hint { text-decoration: underline; }
+.account__who { display: grid; text-align: right; line-height: 1.2; margin: 0; min-width: 0; }
+.account__who strong { font-weight: 600; color: var(--on-dark); }
+.account__who span { color: var(--rail-dim); font-size: var(--text-xs); letter-spacing: 0.06em; text-transform: uppercase; }
+.account .btn { background: transparent; color: var(--rail-ink); border-color: rgb(201 175 191 / 0.55); box-shadow: none; min-height: 2.25rem; }
+.account .btn:hover { background: rgb(255 255 255 / 0.1); border-color: var(--rail-ink); transform: none; box-shadow: none; }
+.account .btn:focus-visible { box-shadow: var(--focus-ring-dark); }
+
+.shell__main { min-width: 0; }
+
+@media (min-width: 56rem) {
+  .shell { grid-template-columns: var(--rail-width) minmax(0, 1fr); grid-template-rows: 1fr; }
+  .shell__rail { height: 100dvh; display: flex; flex-direction: column; padding: var(--space-5) var(--space-3); overflow-y: auto; border-radius: 0 var(--radius-lg) var(--radius-lg) 0; box-shadow: 8px 0 30px -18px rgb(44 21 39 / 0.6); }
+  .shell__top { flex-direction: column; align-items: stretch; padding: 0 var(--space-3) var(--space-5); margin-bottom: var(--space-4); border-bottom: 1px solid rgb(255 255 255 / 0.1); order: 0; }
+  .brand__mark { width: 2.4rem; height: 2.4rem; }
+  .brand__word { font-size: 1.55rem; }
+  .nav { flex-direction: column; overflow: visible; padding: 0; flex: 1; gap: 2px; }
+  .nav a { padding: 0 var(--space-4); border-radius: var(--radius-md); }
+  .nav a[aria-current="page"]::after { content: ""; position: absolute; right: var(--space-4); width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+  .account { display: grid; grid-template-columns: 1fr; align-items: center; margin-top: auto; padding: var(--space-4) var(--space-2) 0; border-top: 1px solid rgb(255 255 255 / 0.1); order: 2; }
+  .account__avatar { display: grid; }
+  .account__hint { display: block; }
+  .account__who { text-align: left; }
+  .account form { grid-column: 1 / -1; }
+  .account .btn { width: 100%; }
+}
+
+.shell-skeleton { display: grid; place-items: center; min-height: 40dvh; color: var(--ink-soft); }

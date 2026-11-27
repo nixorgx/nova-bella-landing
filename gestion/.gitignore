@@ -1,0 +1,67 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+!.env.example
+
+# playwright
+/test-results/
+/playwright-report/
+
+# screenshots: only the small final-feminine set is versioned (older demo sets are regenerable and heavy)
+/e2e/screenshots/*
+!/e2e/screenshots/final-feminine/
+/e2e/screenshots/final-feminine/*
+!/e2e/screenshots/final-feminine/01-login-1440.jpg
+!/e2e/screenshots/final-feminine/01-login-375.jpg
+!/e2e/screenshots/final-feminine/02-dashboard-1440.jpg
+!/e2e/screenshots/final-feminine/03-pos-vendedor-1440.jpg
+!/e2e/screenshots/final-feminine/03-pos-vendedor-375.jpg
+!/e2e/screenshots/final-feminine/07-reportes-1440.jpg
+!/e2e/screenshots/final-feminine/16-cuenta-contrasena-1440.jpg
+!/e2e/screenshots/final-feminine/18-usuarios-contrasena-temporal-1440.jpg
+/.vercel
+/.env*
+!.env.example
+
+# Etapa 2: a small set of storefront / admin screenshots (compressed JPG) is versioned
+!/e2e/screenshots/tienda/
+/e2e/screenshots/tienda/*
+!/e2e/screenshots/tienda/*.jpg

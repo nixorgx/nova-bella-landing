@@ -1,0 +1,28 @@
+# Solo PostgreSQL 17 para desarrollo local, separado del antiguo backend FastAPI.
+# Crea gestion/.env con POSTGRES_PASSWORD aleatorio antes de ejecutar docker compose up -d.
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5435:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: inventario
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en gestion/.env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d inventario"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - gestion_pgdata:/var/lib/postgresql/data
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: local
+      options:
+        max-size: "5m"
+        max-file: "2"
+volumes:
+  gestion_pgdata:
