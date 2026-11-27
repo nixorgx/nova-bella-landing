@@ -477,7 +477,9 @@ function updateScrollDetails() {
   const limit = document.documentElement.scrollHeight - window.innerHeight;
   const progress = limit > 0 ? Math.min(100,Math.max(0,window.scrollY / limit * 100)) : 0;
   document.getElementById('scrollIndicator').style.width = `${progress}%`;
-  document.querySelector('.floating-whatsapp').classList.toggle('is-visible',window.scrollY > 440);
+  const footer = document.querySelector('.site-footer');
+  const footerVisible = footer && footer.getBoundingClientRect().top < window.innerHeight;
+  document.querySelector('.floating-whatsapp').classList.toggle('is-visible', window.scrollY > 440 && !footerVisible);
   const position = window.scrollY + window.innerHeight * .4;
   let currentSection = '';
   navLinks.forEach(link => {
@@ -497,6 +499,7 @@ window.addEventListener('scroll', () => {
   scrollFramePending = true;
   window.requestAnimationFrame(updateScrollDetails);
 }, { passive: true });
+window.addEventListener('resize', updateScrollDetails, { passive: true });
 updateScrollDetails();
 
 document.getElementById('year').textContent = String(new Date().getFullYear());
